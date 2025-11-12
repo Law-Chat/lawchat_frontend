@@ -18,7 +18,8 @@ class AppShell extends StatelessWidget {
       body: child,
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.go('/chatting'),
-        child: const Icon(LucideIcons.plus, size: 28),
+        backgroundColor: cs.primary,
+        child: const Icon(LucideIcons.plus, size: 28, color: Colors.white),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: SafeArea(
@@ -27,40 +28,50 @@ class AppShell extends StatelessWidget {
           builder: (context) {
             final bottomInset = MediaQuery.of(context).viewPadding.bottom;
             final barHeight = 64.0 + bottomInset;
-            return BottomAppBar(
-              shape: const CircularNotchedRectangle(),
-              notchMargin: 6,
-              child: SizedBox(
-                height: barHeight,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _NavItem(
-                      icon: LucideIcons.home,
-                      selected: sel('/home') || loc == '/',
-                      onTap: () => context.go('/home'),
-                      selectedColor: cs.primary,
-                    ),
-                    _NavItem(
-                      icon: LucideIcons.clock,
-                      selected: sel('/history'),
-                      onTap: () => context.go('/history'),
-                      selectedColor: cs.primary,
-                    ),
-                    const SizedBox(width: 56),
-                    _NavItem(
-                      icon: LucideIcons.user,
-                      selected: sel('/profile'),
-                      onTap: () => context.go('/profile'),
-                      selectedColor: cs.primary,
-                    ),
-                    _NavItem(
-                      icon: LucideIcons.bell,
-                      selected: sel('/alerts'),
-                      onTap: () => context.go('/alerts'),
-                      selectedColor: cs.primary,
-                    ),
-                  ],
+
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  top: BorderSide(color: Colors.black.withOpacity(0.08)),
+                ),
+              ),
+              child: BottomAppBar(
+                shape: const CircularNotchedRectangle(),
+                notchMargin: 6,
+                color: AppColors.white,
+                child: SizedBox(
+                  height: barHeight,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _NavItem(
+                        icon: LucideIcons.home,
+                        selected: sel('/home') || loc == '/',
+                        onTap: () => context.go('/home'),
+                        selectedColor: cs.primary,
+                      ),
+                      _NavItem(
+                        icon: LucideIcons.clock,
+                        selected: sel('/history'),
+                        onTap: () => context.go('/history'),
+                        selectedColor: cs.primary,
+                      ),
+                      const SizedBox(width: 56),
+                      _NavItem(
+                        icon: LucideIcons.user,
+                        selected: sel('/profile'),
+                        onTap: () => context.go('/profile'),
+                        selectedColor: cs.primary,
+                      ),
+                      _NavItem(
+                        icon: LucideIcons.bell,
+                        selected: sel('/alerts'),
+                        onTap: () => context.go('/alerts'),
+                        selectedColor: cs.primary,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );
@@ -87,8 +98,8 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double size = 24;
-    if (icon == LucideIcons.user) size = 26;     // 프로필 아이콘 크게
-    if (icon == LucideIcons.bell) size = 23;     // 벨 아이콘 작게
+    if (icon == LucideIcons.user) size = 26;
+    if (icon == LucideIcons.bell) size = 23;
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
@@ -119,4 +130,3 @@ class _NavItem extends StatelessWidget {
     );
   }
 }
-
