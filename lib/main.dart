@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lawchat_frontend/features/onboarding/onboarding_screen.dart';
 import 'package:lawchat_frontend/features/splash/splash_screen.dart';
 
 import 'theme/app_theme.dart';
@@ -22,6 +23,10 @@ class MyApp extends StatelessWidget {
       initialLocation: '/',
       routes: [
         GoRoute(path: '/', builder: (context, state) => const SplashScreen()),
+        GoRoute(
+          path: '/onboarding',
+          builder: (context, state) => const OnboardingScreen(),
+        ),
         ShellRoute(
           builder: (context, state, child) => AppShell(child: child),
           routes: [
