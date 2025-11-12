@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lawchat_frontend/features/onboarding/onboarding_screen.dart';
+import 'package:lawchat_frontend/features/splash/splash_screen.dart';
 
 import 'theme/app_theme.dart';
 import 'widgets/nav/app_shell.dart';
@@ -18,38 +20,25 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final router = GoRouter(
+      initialLocation: '/',
       routes: [
+        GoRoute(path: '/', builder: (context, state) => const SplashScreen()),
+        GoRoute(
+          path: '/onboarding',
+          builder: (context, state) => const OnboardingScreen(),
+        ),
         ShellRoute(
           builder: (context, state, child) => AppShell(child: child),
           routes: [
-            GoRoute(
-              path: '/',
-              redirect: (_, __) => '/home',
-            ),
-            GoRoute(
-              path: '/home',
-              builder: (_, __) => const HomePage(),
-            ),
-            GoRoute(
-              path: '/history',
-              builder: (_, __) => const HistoryPage(),
-            ),
-            GoRoute(
-              path: '/profile',
-              builder: (_, __) => const ProfilePage(),
-            ),
-            GoRoute(
-              path: '/alerts',
-              builder: (_, __) => const AlertsPage(),
-            ),
+            GoRoute(path: '/home', builder: (_, __) => const HomePage()),
+            GoRoute(path: '/history', builder: (_, __) => const HistoryPage()),
+            GoRoute(path: '/profile', builder: (_, __) => const ProfilePage()),
+            GoRoute(path: '/alerts', builder: (_, __) => const AlertsPage()),
           ],
         ),
 
         // FAB 단독 페이지
-        GoRoute(
-          path: '/chatting',
-          builder: (_, __) => const ChattingPage(),
-        ),
+        GoRoute(path: '/chatting', builder: (_, __) => const ChattingPage()),
       ],
     );
 
