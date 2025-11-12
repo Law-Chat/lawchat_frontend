@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:syncfusion_flutter_core/localizations.dart';
 import 'package:go_router/go_router.dart';
 
 import 'theme/app_theme.dart';
 import 'widgets/nav/app_shell.dart';
-
 import 'features/home/home_page.dart';
 import 'features/history/history_page.dart';
 import 'features/profile/profile_page.dart';
@@ -22,34 +23,14 @@ class MyApp extends StatelessWidget {
         ShellRoute(
           builder: (context, state, child) => AppShell(child: child),
           routes: [
-            GoRoute(
-              path: '/',
-              redirect: (_, __) => '/home',
-            ),
-            GoRoute(
-              path: '/home',
-              builder: (_, __) => const HomePage(),
-            ),
-            GoRoute(
-              path: '/history',
-              builder: (_, __) => const HistoryPage(),
-            ),
-            GoRoute(
-              path: '/profile',
-              builder: (_, __) => const ProfilePage(),
-            ),
-            GoRoute(
-              path: '/alerts',
-              builder: (_, __) => const AlertsPage(),
-            ),
+            GoRoute(path: '/', redirect: (_, __) => '/home'),
+            GoRoute(path: '/home', builder: (_, __) => const HomePage()),
+            GoRoute(path: '/history', builder: (_, __) => const HistoryPage()),
+            GoRoute(path: '/profile', builder: (_, __) => const ProfilePage()),
+            GoRoute(path: '/alerts', builder: (_, __) => const AlertsPage()),
           ],
         ),
-
-        // FAB 단독 페이지
-        GoRoute(
-          path: '/chatting',
-          builder: (_, __) => const ChattingPage(),
-        ),
+        GoRoute(path: '/chatting', builder: (_, __) => const ChattingPage()),
       ],
     );
 
@@ -57,6 +38,13 @@ class MyApp extends StatelessWidget {
       title: 'Law Chat',
       theme: buildLightTheme(),
       routerConfig: router,
+      locale: const Locale('ko', 'KR'),
+      supportedLocales: const [Locale('ko', 'KR')],
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
     );
   }
 }
