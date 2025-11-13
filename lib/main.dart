@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lawchat_frontend/features/onboarding/onboarding_screen.dart';
 import 'package:lawchat_frontend/features/splash/splash_screen.dart';
 
 import 'theme/app_theme.dart';
 import 'widgets/nav/app_shell.dart';
-
 import 'features/home/home_page.dart';
 import 'features/history/history_page.dart';
 import 'features/profile/profile_page.dart';
@@ -37,7 +37,6 @@ class MyApp extends StatelessWidget {
           ],
         ),
 
-        // FAB 단독 페이지
         GoRoute(path: '/chatting', builder: (_, __) => const ChattingPage()),
       ],
     );
@@ -46,6 +45,13 @@ class MyApp extends StatelessWidget {
       title: 'Law Chat',
       theme: buildLightTheme(),
       routerConfig: router,
+      locale: const Locale('ko', 'KR'),
+      supportedLocales: const [Locale('ko', 'KR')],
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
     );
   }
 }
