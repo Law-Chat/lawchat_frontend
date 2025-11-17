@@ -40,7 +40,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
-                onPressed: () => context.go('/home'),
+                onPressed: () => context.go('/login'),
                 child: const Text('Skip'),
               ),
             ),
@@ -72,9 +72,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ? AppButton(
                       variant: AppButtonVariant.primary,
                       label: '시작하기',
-                      onPressed: () => context.go('/home'),
+                      onPressed: () => context.go('/login'),
                     )
-                  : const SizedBox(height: 48), // Match AppButton height
+                  : const SizedBox(height: 48),
             ),
             const SizedBox(height: 20),
           ],

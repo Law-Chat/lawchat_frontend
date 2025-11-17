@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lawchat_frontend/features/auth/login_screen.dart';
+import 'package:lawchat_frontend/features/auth/register_screen.dart';
 import 'package:lawchat_frontend/features/onboarding/onboarding_screen.dart';
 import 'package:lawchat_frontend/features/splash/splash_screen.dart';
 
@@ -26,6 +28,14 @@ class MyApp extends StatelessWidget {
         GoRoute(
           path: '/onboarding',
           builder: (context, state) => const OnboardingScreen(),
+        ),
+        GoRoute(
+          path: '/login',
+          builder: (context, state) => const LoginScreen(),
+        ),
+        GoRoute(
+          path: '/register',
+          builder: (context, state) => const RegisterScreen(),
         ),
         ShellRoute(
           builder: (context, state, child) => AppShell(child: child),
