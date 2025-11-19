@@ -1,8 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
+
+  Future<void> _loginWithGoogle() async {
+    final baseUrl = dotenv.env['BASE_URL'] ?? '';
+
+    const redirectUri = 'lawchat://auth/callback';
+
+    final oauthUrl =
+        '$baseUrl/oauth2/authorization/google'
+        '?redirect_uri=$redirectUri';
+
+    final url = Uri.parse(oauthUrl);
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      throw Exception('OAuth URL launch failed: $oauthUrl');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,13 +41,9 @@ class LoginScreen extends StatelessWidget {
               ),
               const SizedBox(height: 100),
               ElevatedButton.icon(
-                icon: Image.asset(
-                  'assets/images/google_logo.png',
-                  height: 24.0,
-                ), // Assuming you have a google logo asset
+                icon: Image.asset('assets/images/google_logo.png', height: 24),
                 label: const Text('구글 로그인'),
-                onPressed: () =>
-                    context.go('/register'), // Navigate to register for now
+                onPressed: _loginWithGoogle,
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),
                   backgroundColor: Colors.white,
