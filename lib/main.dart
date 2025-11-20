@@ -23,11 +23,16 @@ import 'services/auth_service.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
-  runApp(const MyApp());
+
+  final isLoggedIn = await AuthService.instance.isLoggedIn();
+
+  runApp(MyApp(isLoggedIn: isLoggedIn));
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  final bool isLoggedIn;
+
+  const MyApp({super.key, required this.isLoggedIn});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -41,9 +46,8 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _setupRouter(); // 1) 라우터 먼저 세팅
-    _initDeepLinks(); // 2) 딥링크 리스너 등록
-    _checkInitialLogin(); // 3) 토큰 있으면 /home으로 이동
+    _setupRouter();
+    _initDeepLinks();
   }
 
   @override
@@ -52,21 +56,10 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
   }
 
-  // 처음 앱 켰을 때 로그인 상태라면 /home으로 보내기
-  Future<void> _checkInitialLogin() async {
-    final isLoggedIn = await AuthService.instance.isLoggedIn();
-    if (isLoggedIn) {
-      _router.go('/home');
-    }
-  }
-
-  // 딥링크 처리
   void _handleIncomingUri(Uri uri) async {
     debugPrint('incoming uri: $uri');
 
-    if (uri.scheme == 'lawchat' &&
-        uri.host == 'auth' &&
-        uri.path == '/callback') {
+    if (uri.scheme == 'lawchat' && uri.host == 'callback') {
       final token = uri.queryParameters['token'];
       final isNewUser = uri.queryParameters['isNewUser'] == 'true';
 
@@ -82,7 +75,6 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  // app_links 기반 딥링크 리스너
   void _initDeepLinks() {
     _appLinks = AppLinks();
 
@@ -99,7 +91,7 @@ class _MyAppState extends State<MyApp> {
 
   void _setupRouter() {
     _router = GoRouter(
-      initialLocation: '/',
+      initialLocation: widget.isLoggedIn ? '/home' : '/',
       routes: [
         GoRoute(path: '/', builder: (_, __) => const SplashScreen()),
         GoRoute(
