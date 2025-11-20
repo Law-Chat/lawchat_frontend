@@ -8,7 +8,7 @@ class LoginScreen extends StatelessWidget {
   Future<void> _loginWithGoogle() async {
     final baseUrl = dotenv.env['BASE_URL'] ?? '';
 
-    const redirectUri = 'lawchat://auth/callback';
+    const redirectUri = 'lawchat://callback';
 
     final oauthUrl =
         '$baseUrl/oauth2/authorization/google'
