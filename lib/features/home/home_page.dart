@@ -6,6 +6,8 @@ import '../../ui/components/checkbox.dart';
 import '../../ui/components/toggle.dart';
 import '../../theme/colors.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lawchat_frontend/services/auth_service.dart';
+import 'package:go_router/go_router.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -47,7 +49,10 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('squareIcon', style: TextStyle(fontWeight: FontWeight.w600)),
+                  const Text(
+                    'squareIcon',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 12,
@@ -76,7 +81,10 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  const Text('primary', style: TextStyle(fontWeight: FontWeight.w600)),
+                  const Text(
+                    'primary',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
                   const SizedBox(height: 8),
                   AppButton(
                     variant: AppButtonVariant.primary,
@@ -94,7 +102,10 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('disabledWithIcon', style: TextStyle(fontWeight: FontWeight.w600)),
+                  const Text(
+                    'disabledWithIcon',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
                   const SizedBox(height: 8),
                   AppInput(
                     variant: AppInputVariant.disabledWithIcon,
@@ -104,7 +115,10 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const SizedBox(height: 16),
 
-                  const Text('chat (with trailing action)', style: TextStyle(fontWeight: FontWeight.w600)),
+                  const Text(
+                    'chat (with trailing action)',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
                   const SizedBox(height: 8),
                   AppInput(
                     variant: AppInputVariant.chat,
@@ -123,7 +137,10 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const SizedBox(height: 16),
 
-                  const Text('search (suffix icon only)', style: TextStyle(fontWeight: FontWeight.w600)),
+                  const Text(
+                    'search (suffix icon only)',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
                   const SizedBox(height: 8),
                   AppInput(
                     variant: AppInputVariant.search,
@@ -209,6 +226,25 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
+
+            _Section(
+              title: 'Auth',
+              child: AppButton(
+                variant: AppButtonVariant.primary,
+                label: '저장된 토큰 초기화',
+                onPressed: () async {
+                  await AuthService.instance.clearToken();
+
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('저장된 토큰이 초기화되었습니다.')),
+                    );
+
+                    context.go('/');
+                  }
+                },
+              ),
+            ),
           ],
         ),
       ),
@@ -232,19 +268,21 @@ class _Section extends StatelessWidget {
             color: Colors.black.withOpacity(0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
-          )
+          ),
         ],
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: AppColors.secondary,
-              )),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: AppColors.secondary,
+            ),
+          ),
           const SizedBox(height: 12),
           child,
         ],
