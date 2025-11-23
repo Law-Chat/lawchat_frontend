@@ -17,6 +17,8 @@ import 'features/home/home_page.dart';
 import 'features/history/history_page.dart';
 import 'features/profile/profile_page.dart';
 import 'features/alerts/alerts_page.dart';
+import 'models/chat_models.dart';
+import 'features/law/law_detail_page.dart';
 import 'features/chatting/chatting_page.dart';
 import 'services/auth_service.dart';
 
@@ -109,7 +111,17 @@ class _MyAppState extends State<MyApp> {
             GoRoute(path: '/alerts', builder: (_, __) => const AlertsPage()),
           ],
         ),
-        GoRoute(path: '/chatting', builder: (_, __) => const ChattingPage()),
+        GoRoute(
+          path: '/chatting',
+          builder: (_, state) {
+            final extra = state.extra;
+            if (extra is ChatThread) {
+              return ChattingPage(thread: extra);
+            }
+            return const ChattingPage();
+          },
+        ),
+        GoRoute(path: '/law/detail', builder: (_, __) => const LawDetailPage()),
       ],
     );
   }
