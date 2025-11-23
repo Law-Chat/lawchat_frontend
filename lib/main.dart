@@ -1,6 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:app_links/app_links.dart';
+
 import 'package:lawchat_frontend/features/auth/login_screen.dart';
 import 'package:lawchat_frontend/features/auth/register_screen.dart';
 import 'package:lawchat_frontend/features/onboarding/onboarding_screen.dart';
@@ -13,32 +18,90 @@ import 'features/history/history_page.dart';
 import 'features/profile/profile_page.dart';
 import 'features/alerts/alerts_page.dart';
 import 'features/chatting/chatting_page.dart';
+import 'services/auth_service.dart';
 
-void main() => runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final isLoggedIn = await AuthService.instance.isLoggedIn();
+
+  runApp(MyApp(isLoggedIn: isLoggedIn));
+}
+
+class MyApp extends StatefulWidget {
+  final bool isLoggedIn;
+
+  const MyApp({super.key, required this.isLoggedIn});
 
   @override
-  Widget build(BuildContext context) {
-    final router = GoRouter(
-      initialLocation: '/',
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late final GoRouter _router;
+  late final AppLinks _appLinks;
+  StreamSubscription<Uri>? _linkSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupRouter();
+    _initDeepLinks();
+  }
+
+  @override
+  void dispose() {
+    _linkSub?.cancel();
+    super.dispose();
+  }
+
+  void _handleIncomingUri(Uri uri) async {
+    debugPrint('incoming uri: $uri');
+
+    if (uri.scheme == 'lawchat' && uri.host == 'callback') {
+      final token = uri.queryParameters['token'];
+      final isNewUser = uri.queryParameters['isNewUser'] == 'true';
+
+      if (token != null && token.isNotEmpty) {
+        await AuthService.instance.saveToken(token);
+
+        if (isNewUser) {
+          _router.go('/register');
+        } else {
+          _router.go('/home');
+        }
+      }
+    }
+  }
+
+  void _initDeepLinks() {
+    _appLinks = AppLinks();
+
+    _linkSub = _appLinks.uriLinkStream.listen(
+      (Uri? uri) {
+        if (uri == null) return;
+        _handleIncomingUri(uri);
+      },
+      onError: (err) {
+        debugPrint('link stream error: $err');
+      },
+    );
+  }
+
+  void _setupRouter() {
+    _router = GoRouter(
+      initialLocation: widget.isLoggedIn ? '/home' : '/',
       routes: [
-        GoRoute(path: '/', builder: (context, state) => const SplashScreen()),
+        GoRoute(path: '/', builder: (_, __) => const SplashScreen()),
         GoRoute(
           path: '/onboarding',
-          builder: (context, state) => const OnboardingScreen(),
+          builder: (_, __) => const OnboardingScreen(),
         ),
-        GoRoute(
-          path: '/login',
-          builder: (context, state) => const LoginScreen(),
-        ),
-        GoRoute(
-          path: '/register',
-          builder: (context, state) => const RegisterScreen(),
-        ),
+        GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
+        GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
         ShellRoute(
-          builder: (context, state, child) => AppShell(child: child),
+          builder: (_, __, child) => AppShell(child: child),
           routes: [
             GoRoute(path: '/home', builder: (_, __) => const HomePage()),
             GoRoute(path: '/history', builder: (_, __) => const HistoryPage()),
@@ -46,18 +109,20 @@ class MyApp extends StatelessWidget {
             GoRoute(path: '/alerts', builder: (_, __) => const AlertsPage()),
           ],
         ),
-
         GoRoute(path: '/chatting', builder: (_, __) => const ChattingPage()),
       ],
     );
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return MaterialApp.router(
+      routerConfig: _router,
       title: 'Law Chat',
       theme: buildLightTheme(),
-      routerConfig: router,
       locale: const Locale('ko', 'KR'),
       supportedLocales: const [Locale('ko', 'KR')],
-      localizationsDelegates: [
+      localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
