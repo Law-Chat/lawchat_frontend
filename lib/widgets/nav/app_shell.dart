@@ -17,7 +17,7 @@ class AppShell extends StatelessWidget {
       extendBody: true,
       body: child,
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/chatting'),
+        onPressed: () => context.push('/chatting'),
         backgroundColor: cs.primary,
         child: const Icon(LucideIcons.plus, size: 28, color: Colors.white),
       ),
