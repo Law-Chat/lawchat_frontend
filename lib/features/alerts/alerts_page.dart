@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lawchat_frontend/theme/colors.dart';
 
-// 1. Removed 'type' from the data model
 class NotificationItem {
   final int notificationId;
   final String? message;
@@ -16,6 +15,21 @@ class NotificationItem {
     required this.isRead,
     this.createdAt,
   });
+
+  // copyWith method to easily update properties
+  NotificationItem copyWith({
+    int? notificationId,
+    String? message,
+    bool? isRead,
+    String? createdAt,
+  }) {
+    return NotificationItem(
+      notificationId: notificationId ?? this.notificationId,
+      message: message ?? this.message,
+      isRead: isRead ?? this.isRead,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
 }
 
 class AlertsPage extends StatefulWidget {
@@ -27,7 +41,6 @@ class AlertsPage extends StatefulWidget {
 
 class _AlertsPageState extends State<AlertsPage> {
   late List<NotificationItem> _notifications;
-  // Map to hold a random type for each notification to keep icons consistent
   late Map<int, String> _notificationTypes;
   final _random = Random();
   final _types = const ['법령 업데이트', '채팅 답변', '마케팅'];
@@ -36,7 +49,6 @@ class _AlertsPageState extends State<AlertsPage> {
   void initState() {
     super.initState();
     _notifications = _generateDummyNotifications();
-    // Assign a random, but consistent, type to each notification upon init
     _notificationTypes = {
       for (var notif in _notifications)
         notif.notificationId: _types[_random.nextInt(_types.length)],
@@ -72,14 +84,12 @@ class _AlertsPageState extends State<AlertsPage> {
     ];
   }
 
-  // 2. Helper function to format date string
   String _formatCreatedAt(String? dateString) {
     if (dateString == null) return '';
     try {
       final dateTime = DateTime.parse(dateString);
       return DateFormat('yyyy.MM.dd HH:mm').format(dateTime);
     } catch (e) {
-      // Fallback for other date formats or parsing errors
       return dateString;
     }
   }
@@ -116,7 +126,6 @@ class _AlertsPageState extends State<AlertsPage> {
               itemCount: _notifications.length,
               itemBuilder: (context, index) {
                 final notification = _notifications[index];
-                // 3. Get the random type for the current item
                 final type =
                     _notificationTypes[notification.notificationId] ??
                     _types[0];
@@ -151,7 +160,15 @@ class _AlertsPageState extends State<AlertsPage> {
                       _formatCreatedAt(notification.createdAt),
                       style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
-                    onTap: () {},
+                    onTap: () {
+                      if (!notification.isRead) {
+                        setState(() {
+                          _notifications[index] = notification.copyWith(
+                            isRead: true,
+                          );
+                        });
+                      }
+                    },
                   ),
                 );
               },
