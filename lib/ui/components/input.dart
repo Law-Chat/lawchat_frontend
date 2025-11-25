@@ -14,6 +14,8 @@ class AppInput extends StatelessWidget {
     this.onTrailingPressed,
     this.height,
     this.compact = false,
+    this.decoration,
+    this.padding,
   });
 
   final AppInputVariant variant;
@@ -24,6 +26,8 @@ class AppInput extends StatelessWidget {
   final VoidCallback? onTrailingPressed;
   final double? height;
   final bool compact;
+  final BoxDecoration? decoration;
+  final EdgeInsetsGeometry? padding;
 
   OutlineInputBorder _border(Color color) => OutlineInputBorder(
     borderRadius: BorderRadius.circular(12),
@@ -45,22 +49,30 @@ class AppInput extends StatelessWidget {
       Color? hintColor,
       Widget? prefixIcon,
       Widget? suffixIcon,
-    }) =>
-        InputDecoration(
-          isDense: slim,
-          filled: true,
-          fillColor: fill,
-          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: vPad),
-          hintText: hintText,
-          hintStyle: TextStyle(color: hintColor ?? AppColors.disable, fontSize: fontSize),
-          prefixIcon: prefixIcon,
-          prefixIconConstraints: BoxConstraints(minWidth: slim ? 36 : 40, minHeight: slim ? 36 : 40),
-          suffixIcon: suffixIcon,
-          suffixIconConstraints: BoxConstraints(minWidth: slim ? 36 : 40, minHeight: slim ? 36 : 40),
-          enabledBorder: _border(borderColor),
-          focusedBorder: _border(borderColor),
-          disabledBorder: _border(borderColor),
-        );
+    }) => InputDecoration(
+      isDense: slim,
+      filled: true,
+      fillColor: fill,
+      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: vPad),
+      hintText: hintText,
+      hintStyle: TextStyle(
+        color: hintColor ?? AppColors.disable,
+        fontSize: fontSize,
+      ),
+      prefixIcon: prefixIcon,
+      prefixIconConstraints: BoxConstraints(
+        minWidth: slim ? 36 : 40,
+        minHeight: slim ? 36 : 40,
+      ),
+      suffixIcon: suffixIcon,
+      suffixIconConstraints: BoxConstraints(
+        minWidth: slim ? 36 : 40,
+        minHeight: slim ? 36 : 40,
+      ),
+      enabledBorder: _border(borderColor),
+      focusedBorder: _border(borderColor),
+      disabledBorder: _border(borderColor),
+    );
 
     final textStyle = TextStyle(color: AppColors.secondary, fontSize: fontSize);
 
@@ -83,25 +95,51 @@ class AppInput extends StatelessWidget {
         );
 
       case AppInputVariant.chat:
-        return SizedBox(
-          height: h,
+        final inputDecoration = decoration(
+          fill: AppColors.white,
+          borderColor: AppColors.tertiary,
+          hintColor: AppColors.disable,
+          suffixIcon: trailingIcon != null
+              ? IconButton(
+                  onPressed: onTrailingPressed,
+                  icon: Icon(
+                    trailingIcon,
+                    color: AppColors.disable,
+                    size: iconSize,
+                  ),
+                  padding: EdgeInsets.zero,
+                  visualDensity: slim
+                      ? VisualDensity.compact
+                      : VisualDensity.standard,
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                )
+              : null,
+        );
+
+        return Container(
+          margin: const EdgeInsets.fromLTRB(18, 0, 18, 22),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 18,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
           child: TextField(
             controller: controller,
             style: textStyle,
-            decoration: decoration(
-              fill: AppColors.white,
-              borderColor: AppColors.quaternary,
-              hintColor: AppColors.disable,
-              suffixIcon: trailingIcon != null
-                  ? IconButton(
-                onPressed: onTrailingPressed,
-                icon: Icon(trailingIcon, color: AppColors.disable, size: iconSize),
-                padding: EdgeInsets.zero,
-                visualDensity: slim ? VisualDensity.compact : VisualDensity.standard,
-                splashColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-              )
-                  : null,
+            minLines: 1,
+            maxLines: 1,
+            decoration: inputDecoration.copyWith(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
             ),
           ),
         );
@@ -116,11 +154,14 @@ class AppInput extends StatelessWidget {
               fill: AppColors.background,
               borderColor: AppColors.quaternary,
               hintColor: AppColors.disable,
-              suffixIcon: Icon(Icons.search, color: AppColors.disable, size: iconSize),
+              suffixIcon: Icon(
+                Icons.search,
+                color: AppColors.disable,
+                size: iconSize,
+              ),
             ),
           ),
         );
     }
   }
 }
-

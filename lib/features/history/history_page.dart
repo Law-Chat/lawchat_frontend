@@ -7,6 +7,8 @@ import '../../ui/components/input.dart';
 import '../../ui/components/modal.dart';
 import 'history_item.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+import '../../models/chat_models.dart';
+import 'package:go_router/go_router.dart';
 
 class HistoryEntry {
   HistoryEntry(this.title, this.createdAt);
@@ -296,12 +298,8 @@ class _HistoryPageState extends State<HistoryPage> {
                               (entry) => HistoryItem(
                                 title: entry.title,
                                 onTap: () {
-                                  // TODO: 대화창 라우팅 구현
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('열기: ${entry.title}'),
-                                    ),
-                                  );
+                                  final thread = ChatThread.mock(entry.title);
+                                  context.push('/chatting', extra: thread);
                                 },
                                 onDelete: () => _confirmDelete(entry),
                               ),
