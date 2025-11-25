@@ -1,13 +1,7 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
-import '../../ui/components/button.dart';
-import '../../ui/components/input.dart';
-import '../../ui/components/modal.dart';
-import '../../ui/components/checkbox.dart';
-import '../../ui/components/toggle.dart';
-import '../../theme/colors.dart';
-import 'package:lucide_icons/lucide_icons.dart';
-import 'package:lawchat_frontend/services/auth_service.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lawchat_frontend/theme/colors.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,275 +11,167 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // Inputs
-  final _disabledCtrl = TextEditingController(text: '홍길동 · hong@example.com');
-  final _chatCtrl = TextEditingController();
-  final _searchCtrl = TextEditingController();
+  final List<String> _allQuestions = [
+    '대출이나 금리 관련 규정을 정확히 알고 싶은데, 어떻게 확인하면 될까요?',
+    '최근에 바뀐 금융 법령이나 새로 시행된 규정이 있다면 알려주세요.',
+    '주택담보대출 시 필요한 서류와 절차에 대해 알려줘.',
+    '개인정보 보호법의 주요 내용이 뭐야?',
+    '전자금융거래 시 주의해야 할 점은 무엇인가요?',
+    '비상장주식 거래 시 세금 문제에 대해 알려줘.',
+  ];
 
-  // Checkbox / Toggle states
-  bool _checkedA = false;
-  bool _checkedB = true;
-  bool _toggleA = false;
-  bool _toggleB = true;
+  late List<String> _randomQuestions;
 
   @override
-  void dispose() {
-    _disabledCtrl.dispose();
-    _chatCtrl.dispose();
-    _searchCtrl.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _randomQuestions = _getRandomQuestions();
+  }
+
+  List<String> _getRandomQuestions() {
+    final random = Random();
+    final shuffledList = List<String>.from(_allQuestions)..shuffle(random);
+    return shuffledList.take(3).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      backgroundColor: AppColors.white,
+      appBar: AppBar(
+        backgroundColor: AppColors.white,
+        title: Row(
           children: [
-            _Section(
-              title: 'Buttons',
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'squareIcon',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    children: [
-                      AppButton(
-                        variant: AppButtonVariant.squareIcon,
-                        icon: LucideIcons.settings,
-                        onPressed: () {},
-                      ),
-                      AppButton(
-                        variant: AppButtonVariant.squareIcon,
-                        icon: LucideIcons.heart,
-                        onPressed: () {},
-                      ),
-                      AppButton(
-                        variant: AppButtonVariant.squareIcon,
-                        icon: LucideIcons.share2,
-                        onPressed: () {},
-                      ),
-                      AppButton(
-                        variant: AppButtonVariant.squareIcon,
-                        icon: LucideIcons.camera,
-                        onPressed: () {},
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'primary',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 8),
-                  AppButton(
-                    variant: AppButtonVariant.primary,
-                    label: '확인',
-                    onPressed: () {},
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            _Section(
-              title: 'Inputs',
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'disabledWithIcon',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 8),
-                  AppInput(
-                    variant: AppInputVariant.disabledWithIcon,
-                    controller: _disabledCtrl,
-                    hintText: '계정 정보',
-                    leading: LucideIcons.user,
-                  ),
-                  const SizedBox(height: 16),
-
-                  const Text(
-                    'chat (with trailing action)',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 8),
-                  AppInput(
-                    variant: AppInputVariant.chat,
-                    controller: _chatCtrl,
-                    hintText: '무엇이든 물어보세요',
-                    trailingIcon: LucideIcons.send,
-                    onTrailingPressed: () {
-                      if (_chatCtrl.text.trim().isEmpty) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('전송: ${_chatCtrl.text}')),
-                      );
-                      _chatCtrl.clear();
-                      setState(() {});
-                    },
-                    compact: true,
-                  ),
-                  const SizedBox(height: 16),
-
-                  const Text(
-                    'search (suffix icon only)',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 8),
-                  AppInput(
-                    variant: AppInputVariant.search,
-                    controller: _searchCtrl,
-                    hintText: '검색어를 입력하세요',
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            _Section(
-              title: 'Modal',
-              child: Row(
-                children: [
-                  Expanded(
-                    child: AppButton(
-                      variant: AppButtonVariant.primary,
-                      label: '모달 열기',
-                      onPressed: () {
-                        AppModal.show(
-                          context: context,
-                          title: '모달 제목',
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Text('여기에 원하는 위젯을 배치하세요.'),
-                              SizedBox(height: 12),
-                              Text('배경은 background, 구분선은 disable 컬러입니다.'),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            _Section(
-              title: 'Checkbox',
-              child: Row(
-                children: [
-                  AppCheckbox(
-                    value: _checkedA,
-                    onChanged: (v) => setState(() => _checkedA = v),
-                  ),
-                  const SizedBox(width: 12),
-                  const Text('unchecked'),
-                  const SizedBox(width: 24),
-                  AppCheckbox(
-                    value: _checkedB,
-                    onChanged: (v) => setState(() => _checkedB = v),
-                  ),
-                  const SizedBox(width: 12),
-                  const Text('checked'),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            _Section(
-              title: 'Toggle',
-              child: Row(
-                children: [
-                  AppToggle(
-                    value: _toggleA,
-                    onChanged: (v) => setState(() => _toggleA = v),
-                  ),
-                  const SizedBox(width: 16),
-                  const Text('off'),
-                  const SizedBox(width: 32),
-                  AppToggle(
-                    value: _toggleB,
-                    onChanged: (v) => setState(() => _toggleB = v),
-                  ),
-                  const SizedBox(width: 16),
-                  const Text('on'),
-                ],
-              ),
-            ),
-
-            _Section(
-              title: 'Auth',
-              child: AppButton(
-                variant: AppButtonVariant.primary,
-                label: '저장된 토큰 초기화',
-                onPressed: () async {
-                  await AuthService.instance.clearToken();
-
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('저장된 토큰이 초기화되었습니다.')),
-                    );
-
-                    context.go('/');
-                  }
-                },
-              ),
+            Image.asset('assets/images/icon.png', height: 36),
+            const SizedBox(width: 8),
+            const Text(
+              'LawChat',
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ],
+        ),
+        automaticallyImplyLeading: false,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(24.0),
+        children: [
+          const Text(
+            '안녕하세요, 현진 님',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const Text('오늘의 금융법 요약을 한눈에 확인해보세요.', style: TextStyle(fontSize: 18)),
+          const SizedBox(height: 30),
+          _buildSectionHeader(
+            '최근 채팅',
+            () => context.go('/history'),
+          ), // Navigate to history
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 150, // Card height
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                _buildRecentChatCard(
+                  '대출이나 금리 관련 규정을 정확히 알고 싶은데, 어떻게 확인하면 될까요?',
+                  '2025.11.03 17:19',
+                ),
+                _buildRecentChatCard(
+                  '최근에 바뀐 금융 법령이나 새로 시행된 규정이 있다면 알려주세요.',
+                  '2025.11.03 17:19',
+                ),
+                _buildRecentChatCard(
+                  '대출이나 금리 관련 규정을 정확히 알고 싶은데, 어떻게 확인하면 될까요?',
+                  '2025.11.03 17:19',
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 40),
+          _buildSectionHeader('이런 질문은 어떠세요?', null),
+          const SizedBox(height: 10),
+          ..._randomQuestions
+              .map((question) => _buildQuestionChip(question))
+              .toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title, VoidCallback? onSeeAll) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+          if (onSeeAll != null)
+            TextButton(
+              onPressed: onSeeAll,
+              child: const Text('전체보기 >', style: TextStyle(fontSize: 12)),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecentChatCard(String query, String date) {
+    return Container(
+      width: 200,
+      margin: const EdgeInsets.only(right: 12),
+      child: Card(
+        elevation: 0,
+        color: AppColors.background,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.grey.shade300),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(query, maxLines: 4, overflow: TextOverflow.ellipsis),
+              Text(
+                date,
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
-}
 
-class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.child});
-  final String title;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: AppColors.secondary,
+  Widget _buildQuestionChip(String question) {
+    return SizedBox(
+      height: 90, // Set a fixed height for the card area
+      child: Card(
+        elevation: 0,
+        margin: const EdgeInsets.only(bottom: 10),
+        color: AppColors.background,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.grey.shade300),
+        ),
+        child: InkWell(
+          onTap: () {},
+          borderRadius: BorderRadius.circular(12),
+          child: Center(
+            // Center the text vertically and horizontally
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                question,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
             ),
           ),
-          const SizedBox(height: 12),
-          child,
-        ],
+        ),
       ),
     );
   }
