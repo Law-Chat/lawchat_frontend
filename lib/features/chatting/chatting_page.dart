@@ -6,6 +6,8 @@ import '../../ui/components/input.dart';
 import '../../widgets/chat/message_bubble.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../services/chat_service.dart';
+
 class ChattingPage extends StatefulWidget {
   const ChattingPage({super.key, this.thread});
   final ChatThread? thread;
@@ -15,20 +17,28 @@ class ChattingPage extends StatefulWidget {
 }
 
 class _ChattingPageState extends State<ChattingPage> {
-  late final List<ChatMessage> _messages;
+  late List<ChatMessage> _messages;
   late String _title;
   final _input = TextEditingController();
 
-  bool get _isOnboarding => widget.thread == null;
+  int? _chatId; // null이면 새 채팅
+  bool _isSending = false;
+
+  bool get _isOnboarding => _chatId == null && _messages.isEmpty;
 
   @override
   void initState() {
     super.initState();
-    if (_isOnboarding) {
+
+    if (widget.thread == null) {
+      // 새 채팅 시작
+      _chatId = null;
       _title = '새 채팅';
       _messages = [];
     } else {
-      _title = widget.thread!.title;
+      // 기존 채팅 진입
+      _chatId = int.tryParse(widget.thread!.id);
+      _title = widget.thread!.title; // TODO: GET 연결 후 덮어쓰기
       _messages = [...widget.thread!.messages];
     }
   }
@@ -39,37 +49,68 @@ class _ChattingPageState extends State<ChattingPage> {
     super.dispose();
   }
 
-  void _send(String text) {
-    if (text.trim().isEmpty) return;
-    setState(() {
-      _messages.add(
-        ChatMessage(
-          role: ChatRole.user,
-          text: text.trim(),
-          time: DateTime.now(),
-        ),
-      );
-      _title = _isOnboarding ? text.trim() : _title;
-    });
+  Future<void> _send(String text) async {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty || _isSending) return;
+
+    setState(() => _isSending = true);
     _input.clear();
 
-    Future.delayed(const Duration(milliseconds: 600), () {
-      setState(() {
-        _messages.add(
-          ChatMessage(
-            role: ChatRole.assistant,
-            text:
-                '요청하신 내용에 대한 요약 답변입니다. (더미)\n\n'
-                '▪️ 핵심1\n▪️ 핵심2\n\n'
-                '자세한 조문은 둘러보기를 눌러 확인하세요.',
-            time: DateTime.now(),
-          ),
+    try {
+      ChatThread thread;
+
+      if (_chatId == null) {
+        // 새 채팅 → 첫 질문
+        thread = await ChatService.instance.startChat(trimmed);
+      } else {
+        // 기존 채팅 세션에 질문 추가
+        thread = await ChatService.instance.sendMessage(
+          chatId: _chatId!,
+          message: trimmed,
         );
+      }
+
+      if (!mounted) return;
+
+      setState(() {
+        _chatId = int.tryParse(thread.id);
+        _messages = thread.messages;
+
+        if (thread.title.isNotEmpty) {
+          _title = thread.title;
+        }
+
+        _isSending = false;
       });
-    });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() => _isSending = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('메시지 전송 중 오류가 발생했습니다.\n${e.toString()}'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
   }
 
-  void _openLawDetail() => context.push('/law/detail');
+  void _openLawDetail(ChatMessage msg) {
+    final law = msg.relatedLaw;
+
+    if (law == null || law.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('연결된 법령 정보가 없습니다.'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+      return;
+    }
+
+    context.push('/law/detail', extra: law);
+  }
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
@@ -126,7 +167,9 @@ class _ChattingPageState extends State<ChattingPage> {
         final m = _messages[i];
         return MessageBubble(
           msg: m,
-          onExplore: m.role == ChatRole.assistant ? _openLawDetail : null,
+          onExplore: m.role == ChatRole.assistant
+              ? () => _openLawDetail(m)
+              : null,
         );
       },
     );
@@ -140,6 +183,7 @@ class _ChattingPageState extends State<ChattingPage> {
       body: Stack(
         children: [
           _isOnboarding ? _buildOnboarding() : _buildChat(),
+
           Positioned(
             left: 0,
             right: 0,
@@ -149,12 +193,14 @@ class _ChattingPageState extends State<ChattingPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (!_isOnboarding) // TODO: if (!_isOnboarding && _canRegenerate) 재생성 조건 수정
+                  if (!_isOnboarding)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 30),
                       child: Center(
                         child: GestureDetector(
-                          onTap: () {}, // TODO: 재생성 로직 Api
+                          onTap: () {
+                            // TODO: Regenerate API 연결 예정
+                          },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -163,7 +209,6 @@ class _ChattingPageState extends State<ChattingPage> {
                             decoration: BoxDecoration(
                               color: AppColors.background,
                               borderRadius: BorderRadius.circular(12),
-
                               border: Border.all(
                                 color: AppColors.tertiary,
                                 width: 1,
