@@ -102,15 +102,15 @@ class MessageBubble extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: () {}, // TODO: 공유하기 기획 논의 필요
-                    child: const Icon(
-                      LucideIcons.share2,
-                      size: 14,
-                      color: AppColors.disable,
-                    ),
-                  ),
+                  // const SizedBox(width: 8),
+                  // GestureDetector(
+                  //   onTap: () {},
+                  //   child: const Icon(
+                  //     LucideIcons.share2,
+                  //     size: 14,
+                  //     color: AppColors.disable,
+                  //   ),
+                  // ),
                 ],
               ),
             ),
