@@ -13,14 +13,8 @@ class LawDetailPage extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: AppColors.white,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: AppColors.quaternary,
-          ),
-          onPressed: () => context.pop(),
-        ),
         centerTitle: true,
+        leading: const SizedBox(),
         title: const Text(
           '법령 상세',
           style: TextStyle(
@@ -64,8 +58,8 @@ class LawDetailPage extends StatelessWidget {
             const Spacer(),
             AppButton(
               variant: AppButtonVariant.primary,
-              label: '원문 전체보기',
-              onPressed: () {}, // TODO: 액션 논의 필요
+              label: '대화로 돌아가기',
+              onPressed: () => context.pop(),
               height: 48,
             ),
           ],
