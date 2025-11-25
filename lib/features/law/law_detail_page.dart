@@ -4,10 +4,27 @@ import '../../theme/colors.dart';
 import '../../ui/components/button.dart';
 
 class LawDetailPage extends StatelessWidget {
-  const LawDetailPage({super.key});
+  const LawDetailPage({super.key, required this.relatedLaw});
+
+  final String relatedLaw;
 
   @override
   Widget build(BuildContext context) {
+    final String raw = relatedLaw;
+    String titleText;
+    String bodyText;
+
+    final int slashIndex = raw.indexOf('/');
+
+    if (slashIndex == -1) {
+      titleText = raw.isNotEmpty ? raw.trim() : '법령 상세';
+      bodyText = '';
+    } else {
+      titleText = raw.substring(0, slashIndex).trim();
+      bodyText = raw.substring(slashIndex + 1).trim();
+      if (titleText.isEmpty) titleText = '법령 상세';
+    }
+
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: AppBar(
@@ -29,33 +46,31 @@ class LawDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Text(
-              '금융소비자보호법 제19조 (설명의무)',
-              style: TextStyle(
+            Text(
+              titleText,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: AppColors.secondary,
               ),
             ),
             const SizedBox(height: 20),
+
             const Divider(color: AppColors.tertiary, height: 1),
             const SizedBox(height: 20),
-            const Text(
-              '금융상품 판매업자 등은 금융상품 계약을 체결할 때 금융소비자에게 해당 금융상품의 내용, '
-              '위험요인 및 거래조건에 관하여 충실히 설명하여야 한다.',
-              style: TextStyle(height: 1.5, color: AppColors.secondary),
-            ),
-            const SizedBox(height: 20),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 4,
-                alignment: WrapAlignment.start,
-                children: [_Tag('#대출'), _Tag('#설명의무'), _Tag('#금융상품')],
+
+            Text(
+              bodyText.isEmpty ? '관련 법령 본문 정보가 없습니다.' : bodyText,
+              style: const TextStyle(
+                height: 1.5,
+                color: AppColors.secondary,
+                fontSize: 14,
               ),
             ),
+
             const Spacer(),
+
             AppButton(
               variant: AppButtonVariant.primary,
               label: '대화로 돌아가기',
@@ -63,30 +78,6 @@ class LawDetailPage extends StatelessWidget {
               height: 48,
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Tag extends StatelessWidget {
-  const _Tag(this.text);
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: AppColors.white,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
         ),
       ),
     );
