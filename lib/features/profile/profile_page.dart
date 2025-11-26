@@ -14,8 +14,11 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  bool _pushNotifications = true;
-  bool _legalNotifications = true;
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  bool _pushNotifications = false;
+  bool _legalNotifications = false;
   bool _adEmails = false;
 
   String _name = '';
@@ -24,16 +27,59 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    _loadUser();
-    // TODO: Add a method to fetch initial notification settings from the server
+    _loadPageData();
+  }
+
+  Future<void> _loadPageData() async {
+    await _loadUser();
+    await _fetchNotificationSettings();
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _loadUser() async {
     final user = await AuthService.instance.getUser();
-    setState(() {
-      _name = user['name'] ?? '사용자';
-      _email = user['email'] ?? '이메일 정보 없음';
-    });
+    if (mounted) {
+      setState(() {
+        _name = user['name'] ?? '사용자';
+        _email = user['email'] ?? '이메일 정보 없음';
+      });
+    }
+  }
+
+  Future<void> _fetchNotificationSettings() async {
+    try {
+      final token = await AuthService.instance.getToken();
+      if (token == null) throw Exception('Token not found');
+
+      final dio = Dio(
+        BaseOptions(
+          baseUrl: dotenv.env['BASE_URL'] ?? '',
+          headers: {'Authorization': 'Bearer $token'},
+        ),
+      );
+
+      final response = await dio.get('/api/users/notification-agreements');
+      final data = response.data;
+
+      if (mounted) {
+        setState(() {
+          _pushNotifications = data['isPushEnabled'] ?? false;
+          _legalNotifications = data['isLawRevisionEnabled'] ?? false;
+          _adEmails = data['isMarketingEmailEnabled'] ?? false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Failed to fetch notification settings: $e');
+      if (mounted) {
+        setState(() {
+          _errorMessage = '알림 설정을 불러오지 못했습니다.';
+        });
+      }
+    }
   }
 
   Future<void> _logout() async {
@@ -42,7 +88,6 @@ class _ProfilePageState extends State<ProfilePage> {
     if (mounted) context.go('/login');
   }
 
-  // 1. Added method to call the PATCH API
   Future<void> _updateNotificationSettings() async {
     try {
       final token = await AuthService.instance.getToken();
@@ -88,47 +133,56 @@ class _ProfilePageState extends State<ProfilePage> {
         centerTitle: true,
         automaticallyImplyLeading: false,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(24.0),
-        children: [
-          const SizedBox(height: 20),
-          const CircleAvatar(radius: 50, child: Icon(Icons.person, size: 50)),
-          const SizedBox(height: 16),
-          Text(
-            _name,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            _email,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
-          ),
-          const SizedBox(height: 40),
-          _buildSectionHeader('알림 설정'),
-          _buildSettingsCard([
-            _buildToggleRow('푸시 알림 수신 여부', _pushNotifications, (value) {
-              setState(() => _pushNotifications = value);
-              _updateNotificationSettings();
-            }),
-            _buildToggleRow('계정 법령 알림 여부', _legalNotifications, (value) {
-              setState(() => _legalNotifications = value);
-              _updateNotificationSettings();
-            }),
-            _buildToggleRow('광고성 이메일 수신 여부', _adEmails, (value) {
-              setState(() => _adEmails = value);
-              _updateNotificationSettings();
-            }),
-          ]),
-          const SizedBox(height: 30),
-          _buildSectionHeader('계정 설정'),
-          _buildSettingsCard([
-            _buildTextButtonRow('로그아웃', _logout),
-            _buildTextButtonRow('서비스 탈퇴', _logout, isDestructive: true),
-          ]),
-        ],
-      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _buildSettingsList(),
+    );
+  }
+
+  Widget _buildSettingsList() {
+    if (_errorMessage != null) {
+      return Center(child: Text(_errorMessage!));
+    }
+    return ListView(
+      padding: const EdgeInsets.all(24.0),
+      children: [
+        const SizedBox(height: 20),
+        const CircleAvatar(radius: 50, child: Icon(Icons.person, size: 50)),
+        const SizedBox(height: 16),
+        Text(
+          _name,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          _email,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 14, color: Colors.grey),
+        ),
+        const SizedBox(height: 40),
+        _buildSectionHeader('알림 설정'),
+        _buildSettingsCard([
+          _buildToggleRow('푸시 알림 수신 여부', _pushNotifications, (value) {
+            setState(() => _pushNotifications = value);
+            _updateNotificationSettings();
+          }),
+          _buildToggleRow('계정 법령 알림 여부', _legalNotifications, (value) {
+            setState(() => _legalNotifications = value);
+            _updateNotificationSettings();
+          }),
+          _buildToggleRow('광고성 이메일 수신 여부', _adEmails, (value) {
+            setState(() => _adEmails = value);
+            _updateNotificationSettings();
+          }),
+        ]),
+        const SizedBox(height: 30),
+        _buildSectionHeader('계정 설정'),
+        _buildSettingsCard([
+          _buildTextButtonRow('로그아웃', _logout),
+          _buildTextButtonRow('서비스 탈퇴', _logout, isDestructive: true),
+        ]),
+      ],
     );
   }
 
