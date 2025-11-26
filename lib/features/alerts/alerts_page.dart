@@ -7,7 +7,6 @@ import 'package:lawchat_frontend/services/auth_service.dart';
 import 'package:lawchat_frontend/theme/colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-// 1. Updated data model to match API spec and added fromJson factory
 class NotificationItem {
   final int notificationId;
   final String? message;
@@ -66,7 +65,6 @@ class _AlertsPageState extends State<AlertsPage> {
     _fetchNotifications();
   }
 
-  // 2. Added function to fetch notifications from the API
   Future<void> _fetchNotifications() async {
     try {
       final token = await AuthService.instance.getToken();
@@ -88,7 +86,6 @@ class _AlertsPageState extends State<AlertsPage> {
       setState(() {
         _notifications = notifications;
         _notificationTypes = {
-          // Assign random types for icons
           for (var n in notifications)
             n.notificationId: _types[_random.nextInt(_types.length)],
         };
@@ -125,25 +122,43 @@ class _AlertsPageState extends State<AlertsPage> {
     }
   }
 
-  // 3. Implemented onTap handler
   Future<void> _onNotificationTap(
     NotificationItem notification,
     int index,
   ) async {
-    // Mark as read locally
     if (!notification.isRead) {
+      // Optimistically update the UI
       setState(() {
         _notifications[index] = notification.copyWith(isRead: true);
       });
-      // TODO: Add API call to mark as read on the server
+
+      // Call the API to mark as read
+      try {
+        final token = await AuthService.instance.getToken();
+        if (token == null) throw Exception('Authentication token not found.');
+
+        final dio = Dio(
+          BaseOptions(
+            baseUrl: dotenv.env['BASE_URL'] ?? '',
+            headers: {'Authorization': 'Bearer $token'},
+          ),
+        );
+
+        await dio.patch(
+          '/api/notifications/${notification.notificationId}/read',
+        );
+      } catch (e) {
+        // If API call fails, revert the local state
+        debugPrint('Error marking notification as read: $e');
+        setState(() {
+          _notifications[index] = notification.copyWith(isRead: false);
+        });
+      }
     }
 
-    // Launch URL
     final link = notification.link;
     if (link != null && await canLaunchUrl(Uri.parse(link))) {
       await launchUrl(Uri.parse(link), mode: LaunchMode.externalApplication);
-    } else {
-      // Optional: show a snackbar if the link is invalid
     }
   }
 
