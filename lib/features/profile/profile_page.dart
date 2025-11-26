@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lawchat_frontend/services/auth_service.dart';
 import 'package:lawchat_frontend/theme/colors.dart';
 import 'package:lawchat_frontend/ui/components/toggle.dart';
 
@@ -15,17 +16,38 @@ class _ProfilePageState extends State<ProfilePage> {
   bool _legalNotifications = true;
   bool _adEmails = false;
 
+  String _name = '';
+  String _email = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    final user = await AuthService.instance.getUser();
+    setState(() {
+      _name = user['name'] ?? '사용자';
+      _email = user['email'] ?? '이메일 정보 없음';
+    });
+  }
+
+  Future<void> _logout() async {
+    await AuthService.instance.clearToken();
+    await AuthService.instance.clearUser();
+    context.go('/login');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: AppBar(
         backgroundColor: AppColors.white,
-        title: const Text(
-          '프로필',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
+        title: const Text('프로필'),
         centerTitle: true,
+        automaticallyImplyLeading: false,
       ),
       body: ListView(
         padding: const EdgeInsets.all(24.0),
@@ -37,16 +59,16 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Icon(Icons.person, size: 50),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Gildong Hong', // Replace with actual user name
+          Text(
+            _name,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
-          const Text(
-            'example@gmail.com', // Replace with actual user email
+          Text(
+            _email,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14, color: Colors.grey),
+            style: const TextStyle(fontSize: 14, color: Colors.grey),
           ),
           const SizedBox(height: 40),
           _buildSectionHeader('알림 설정'),
@@ -70,12 +92,8 @@ class _ProfilePageState extends State<ProfilePage> {
           const SizedBox(height: 30),
           _buildSectionHeader('계정 설정'),
           _buildSettingsCard([
-            _buildTextButtonRow('로그아웃', () => context.go('/login')),
-            _buildTextButtonRow(
-              '서비스 탈퇴',
-              () => context.go('/login'),
-              isDestructive: true,
-            ),
+            _buildTextButtonRow('로그아웃', _logout),
+            _buildTextButtonRow('서비스 탈퇴', _logout, isDestructive: true),
           ]),
         ],
       ),
@@ -84,7 +102,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.only(left: 16.0, bottom: 8.0),
+      padding: const EdgeInsets.only(bottom: 8.0, left: 4.0),
       child: Text(
         title,
         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),

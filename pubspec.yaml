@@ -24,6 +24,7 @@ dependencies:
   flutter_secure_storage: ^9.2.4
   url_launcher: ^6.3.2
   app_links: ^6.0.0
+  shared_preferences: ^2.2.3 # Added this line
 
 dev_dependencies:
   flutter_test:

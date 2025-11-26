@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lawchat_frontend/services/auth_service.dart';
 import 'package:lawchat_frontend/theme/colors.dart';
 
 class HomePage extends StatefulWidget {
@@ -11,6 +12,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String _name = '사용자';
+
   final List<String> _allQuestions = [
     '대출이나 금리 관련 규정을 정확히 알고 싶은데, 어떻게 확인하면 될까요?',
     '최근에 바뀐 금융 법령이나 새로 시행된 규정이 있다면 알려주세요.',
@@ -25,7 +28,17 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _loadUser();
     _randomQuestions = _getRandomQuestions();
+  }
+
+  Future<void> _loadUser() async {
+    final user = await AuthService.instance.getUser();
+    if (user['name'] != null) {
+      setState(() {
+        _name = user['name']!;
+      });
+    }
   }
 
   List<String> _getRandomQuestions() {
@@ -55,9 +68,9 @@ class _HomePageState extends State<HomePage> {
       body: ListView(
         padding: const EdgeInsets.all(24.0),
         children: [
-          const Text(
-            '안녕하세요, 현진 님',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Text(
+            '안녕하세요, $_name님', // Display user name
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const Text('오늘의 금융법 요약을 한눈에 확인해보세요.', style: TextStyle(fontSize: 18)),
           const SizedBox(height: 30),
