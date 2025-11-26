@@ -1,4 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lawchat_frontend/services/auth_service.dart';
 import 'package:lawchat_frontend/theme/colors.dart';
@@ -23,6 +25,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     _loadUser();
+    // TODO: Add a method to fetch initial notification settings from the server
   }
 
   Future<void> _loadUser() async {
@@ -36,7 +39,43 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _logout() async {
     await AuthService.instance.clearToken();
     await AuthService.instance.clearUser();
-    context.go('/login');
+    if (mounted) context.go('/login');
+  }
+
+  // 1. Added method to call the PATCH API
+  Future<void> _updateNotificationSettings() async {
+    try {
+      final token = await AuthService.instance.getToken();
+      if (token == null) throw Exception('Token not found');
+
+      final dio = Dio(
+        BaseOptions(
+          baseUrl: dotenv.env['BASE_URL'] ?? '',
+          headers: {'Authorization': 'Bearer $token'},
+        ),
+      );
+
+      final data = {
+        'isPushEnabled': _pushNotifications,
+        'isLawRevisionEnabled': _legalNotifications,
+        'isMarketingEmailEnabled': _adEmails,
+      };
+
+      await dio.patch('/api/users/notification-agreements', data: data);
+
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('알림 설정이 저장되었습니다.')));
+      }
+    } catch (e) {
+      debugPrint('Failed to update notification settings: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('설정 저장에 실패했습니다. 다시 시도해주세요.')),
+        );
+      }
+    }
   }
 
   @override
@@ -53,11 +92,7 @@ class _ProfilePageState extends State<ProfilePage> {
         padding: const EdgeInsets.all(24.0),
         children: [
           const SizedBox(height: 20),
-          const CircleAvatar(
-            radius: 50,
-            // backgroundImage: AssetImage('assets/images/profile_placeholder.png'),
-            child: Icon(Icons.person, size: 50),
-          ),
+          const CircleAvatar(radius: 50, child: Icon(Icons.person, size: 50)),
           const SizedBox(height: 16),
           Text(
             _name,
@@ -73,21 +108,18 @@ class _ProfilePageState extends State<ProfilePage> {
           const SizedBox(height: 40),
           _buildSectionHeader('알림 설정'),
           _buildSettingsCard([
-            _buildToggleRow(
-              '푸시 알림 수신 여부',
-              _pushNotifications,
-              (value) => setState(() => _pushNotifications = value),
-            ),
-            _buildToggleRow(
-              '계정 법령 알림 여부',
-              _legalNotifications,
-              (value) => setState(() => _legalNotifications = value),
-            ),
-            _buildToggleRow(
-              '광고성 이메일 수신 여부',
-              _adEmails,
-              (value) => setState(() => _adEmails = value),
-            ),
+            _buildToggleRow('푸시 알림 수신 여부', _pushNotifications, (value) {
+              setState(() => _pushNotifications = value);
+              _updateNotificationSettings();
+            }),
+            _buildToggleRow('계정 법령 알림 여부', _legalNotifications, (value) {
+              setState(() => _legalNotifications = value);
+              _updateNotificationSettings();
+            }),
+            _buildToggleRow('광고성 이메일 수신 여부', _adEmails, (value) {
+              setState(() => _adEmails = value);
+              _updateNotificationSettings();
+            }),
           ]),
           const SizedBox(height: 30),
           _buildSectionHeader('계정 설정'),
