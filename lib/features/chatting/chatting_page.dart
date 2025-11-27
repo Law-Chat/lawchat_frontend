@@ -21,7 +21,7 @@ class _ChattingPageState extends State<ChattingPage> {
   late String _title;
   final _input = TextEditingController();
 
-  int? _chatId; // null이면 새 채팅
+  int? _chatId;
   bool _isSending = false;
 
   bool get _isOnboarding => _chatId == null && _messages.isEmpty;
@@ -31,14 +31,12 @@ class _ChattingPageState extends State<ChattingPage> {
     super.initState();
 
     if (widget.thread == null) {
-      // 새 채팅 시작
       _chatId = null;
       _title = '새 채팅';
       _messages = [];
     } else {
-      // 기존 채팅 진입
-      _chatId = int.tryParse(widget.thread!.id);
-      _title = widget.thread!.title; // TODO: GET 연결 후 덮어쓰기
+      _chatId = widget.thread!.id;
+      _title = widget.thread!.title;
       _messages = [...widget.thread!.messages];
     }
   }
@@ -56,14 +54,14 @@ class _ChattingPageState extends State<ChattingPage> {
     setState(() => _isSending = true);
     _input.clear();
 
+    final bool isNewChat = _chatId == null;
+
     try {
       ChatThread thread;
 
-      if (_chatId == null) {
-        // 새 채팅 → 첫 질문
+      if (isNewChat) {
         thread = await ChatService.instance.startChat(trimmed);
       } else {
-        // 기존 채팅 세션에 질문 추가
         thread = await ChatService.instance.sendMessage(
           chatId: _chatId!,
           message: trimmed,
@@ -73,8 +71,13 @@ class _ChattingPageState extends State<ChattingPage> {
       if (!mounted) return;
 
       setState(() {
-        _chatId = int.tryParse(thread.id);
-        _messages = thread.messages;
+        _chatId = thread.id;
+
+        if (isNewChat) {
+          _messages = thread.messages;
+        } else {
+          _messages = [..._messages, ...thread.messages];
+        }
 
         if (thread.title.isNotEmpty) {
           _title = thread.title;
@@ -83,6 +86,11 @@ class _ChattingPageState extends State<ChattingPage> {
         _isSending = false;
       });
     } catch (e) {
+      if (e.toString().contains('세션이 만료')) {
+        if (mounted) context.go('/login');
+        return;
+      }
+
       if (!mounted) return;
 
       setState(() => _isSending = false);
@@ -98,14 +106,10 @@ class _ChattingPageState extends State<ChattingPage> {
 
   void _openLawDetail(ChatMessage msg) {
     final law = msg.relatedLaw;
-
-    if (law == null || law.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('연결된 법령 정보가 없습니다.'),
-          duration: Duration(seconds: 1),
-        ),
-      );
+    if (law == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('관련 법령 정보 없음')));
       return;
     }
 
