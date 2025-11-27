@@ -11,9 +11,11 @@ class HistoryEntry {
 
   factory HistoryEntry.fromJson(Map<String, dynamic> json) {
     return HistoryEntry(
-      chatId: json['chatId'] as int,
-      summary: json['summary'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      chatId: json['chatId'] is int
+          ? json['chatId'] as int
+          : int.parse(json['chatId'].toString()),
+      summary: json['summary']?.toString() ?? '',
+      createdAt: DateTime.parse(json['createdAt'].toString()),
     );
   }
 }
