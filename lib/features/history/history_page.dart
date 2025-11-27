@@ -1,20 +1,17 @@
 import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:go_router/go_router.dart';
+
 import '../../theme/colors.dart';
 import '../../ui/components/button.dart';
 import '../../ui/components/input.dart';
 import '../../ui/components/modal.dart';
 import 'history_item.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
-import '../../models/chat_models.dart';
-import 'package:go_router/go_router.dart';
-
-class HistoryEntry {
-  HistoryEntry(this.title, this.createdAt);
-  final String title;
-  final DateTime createdAt;
-}
+import '../../models/chat_history_models.dart';
+import '../../services/chat_history_service.dart';
+import '../../services/chat_service.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -24,50 +21,55 @@ class HistoryPage extends StatefulWidget {
 
 class _HistoryPageState extends State<HistoryPage> {
   final _searchCtrl = TextEditingController();
-  final List<HistoryEntry> _all = [
-    HistoryEntry(
-      '대부업 최고 이자율 문의',
-      DateTime.now().subtract(const Duration(hours: 1)),
-    ),
-    HistoryEntry(
-      '최근 개정된 금융소비자보호법 요약',
-      DateTime.now().subtract(const Duration(hours: 3)),
-    ),
-    HistoryEntry(
-      '대출 연체 시 법적 절차',
-      DateTime.now().subtract(const Duration(hours: 5)),
-    ),
-    HistoryEntry(
-      '투자 손실 발생 시 구제 가능 여부',
-      DateTime.now().subtract(const Duration(days: 1, hours: 2)),
-    ),
-    HistoryEntry(
-      '불법 사금융 신고 방법 안내',
-      DateTime.now().subtract(const Duration(days: 1, hours: 4)),
-    ),
-    HistoryEntry(
-      '예금자보호법 적용 한도',
-      DateTime.now().subtract(const Duration(days: 1, hours: 7)),
-    ),
-    HistoryEntry(
-      '금융감독원 민원 절차',
-      DateTime.now().subtract(const Duration(days: 3)),
-    ),
-    HistoryEntry(
-      '자주 묻는 금융 규정 TOP 5',
-      DateTime.now().subtract(const Duration(days: 5)),
-    ),
-  ];
+
+  List<HistoryEntry> _all = [];
 
   String _query = '';
   DateTimeRange? _range;
 
+  bool _isLoading = false;
+  String? _error;
+
   @override
   void initState() {
     super.initState();
+
     _searchCtrl.addListener(
       () => setState(() => _query = _searchCtrl.text.trim()),
     );
+
+    _fetchHistories();
+  }
+
+  Future<void> _fetchHistories() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final result = await ChatHistoryService.instance.getHistories(
+        startDate: _range?.start,
+        endDate: _range?.end,
+        keyword: _query.isEmpty ? null : _query,
+      );
+      if (!mounted) return;
+      setState(() {
+        _all = result;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (e.toString().contains('세션이 만료')) {
+        context.go('/login');
+        return;
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _error = e.toString();
+      });
+    }
   }
 
   @override
@@ -110,16 +112,7 @@ class _HistoryPageState extends State<HistoryPage> {
 
   List<HistoryEntry> get _filtered {
     return _all.where((e) {
-      final matchText = _query.isEmpty || e.title.contains(_query);
-      final matchDate = _range == null
-          ? true
-          : (e.createdAt.isAfter(
-                  _range!.start.subtract(const Duration(seconds: 1)),
-                ) &&
-                e.createdAt.isBefore(
-                  _range!.end.add(const Duration(seconds: 1)),
-                ));
-      return matchText && matchDate;
+      return _query.isEmpty || e.summary.contains(_query);
     }).toList();
   }
 
@@ -156,13 +149,15 @@ class _HistoryPageState extends State<HistoryPage> {
                     showActionButtons: true,
                     confirmText: '적용',
                     cancelText: '취소',
-
                     rangeSelectionColor: AppColors.primary.withOpacity(0.1),
                     startRangeSelectionColor: AppColors.primary,
                     endRangeSelectionColor: AppColors.primary,
                     todayHighlightColor: AppColors.primary,
                     selectionTextStyle: const TextStyle(color: Colors.white),
-
+                    initialSelectedRange: _range != null
+                        ? PickerDateRange(_range!.start, _range!.end)
+                        : null,
+                    initialDisplayDate: _range?.start,
                     headerStyle: const DateRangePickerHeaderStyle(
                       backgroundColor: AppColors.white,
                       textAlign: TextAlign.center,
@@ -172,7 +167,6 @@ class _HistoryPageState extends State<HistoryPage> {
                         color: AppColors.secondary,
                       ),
                     ),
-
                     monthViewSettings: const DateRangePickerMonthViewSettings(
                       firstDayOfWeek: 1,
                       dayFormat: 'EE',
@@ -184,12 +178,10 @@ class _HistoryPageState extends State<HistoryPage> {
                         ),
                       ),
                     ),
-
                     monthCellStyle: const DateRangePickerMonthCellStyle(
                       textStyle: TextStyle(color: AppColors.secondary),
                       todayTextStyle: TextStyle(color: AppColors.primary),
                     ),
-
                     onSubmit: (Object? val) {
                       if (val is PickerDateRange) {
                         pickedRange = DateTimeRange(
@@ -211,7 +203,13 @@ class _HistoryPageState extends State<HistoryPage> {
 
     if (pickedRange != null) {
       setState(() => _range = pickedRange);
+      _fetchHistories();
     }
+  }
+
+  void _onSearch() {
+    FocusScope.of(context).unfocus();
+    _fetchHistories();
   }
 
   void _confirmDelete(HistoryEntry entry) {
@@ -223,8 +221,28 @@ class _HistoryPageState extends State<HistoryPage> {
       confirmLabel: '삭제',
       cancelLabel: '취소',
       confirmColor: AppColors.primary,
-      onConfirm: () {
-        setState(() => _all.remove(entry));
+      onConfirm: () async {
+        try {
+          await ChatHistoryService.instance.deleteHistory(entry.chatId);
+
+          if (!mounted) return;
+
+          setState(() {
+            _all.removeWhere((e) => e.chatId == entry.chatId);
+          });
+
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('채팅 기록이 삭제되었습니다.')));
+        } catch (e) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('삭제 중 오류가 발생했습니다.\n${e.toString()}'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
       },
     );
   }
@@ -259,6 +277,8 @@ class _HistoryPageState extends State<HistoryPage> {
                     variant: AppInputVariant.search,
                     controller: _searchCtrl,
                     hintText: '검색어를 입력하세요.',
+                    trailingIcon: LucideIcons.search,
+                    onTrailingPressed: _onSearch,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -273,7 +293,17 @@ class _HistoryPageState extends State<HistoryPage> {
             ),
             const SizedBox(height: 16),
             Expanded(
-              child: grouped.isEmpty
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _error != null
+                  ? Center(
+                      child: Text(
+                        _error!,
+                        style: const TextStyle(color: AppColors.error),
+                        textAlign: TextAlign.center,
+                      ),
+                    )
+                  : grouped.isEmpty
                   ? const Center(
                       child: Text(
                         '검색 결과가 없습니다.',
@@ -296,10 +326,19 @@ class _HistoryPageState extends State<HistoryPage> {
                             const SizedBox(height: 10),
                             ...section.value.map(
                               (entry) => HistoryItem(
-                                title: entry.title,
-                                onTap: () {
-                                  final thread = ChatThread.mock(entry.title);
-                                  context.push('/chatting', extra: thread);
+                                chatId: entry.chatId,
+                                title: entry.summary,
+                                onTap: () async {
+                                  try {
+                                    final detail = await ChatService.instance
+                                        .getChatDetail(entry.chatId);
+
+                                    context.push('/chatting', extra: detail);
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('채팅 불러오기 실패: $e')),
+                                    );
+                                  }
                                 },
                                 onDelete: () => _confirmDelete(entry),
                               ),

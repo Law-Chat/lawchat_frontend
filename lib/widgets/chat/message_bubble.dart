@@ -85,15 +85,17 @@ class MessageBubble extends StatelessWidget {
                   GestureDetector(
                     onTap: () async {
                       await Clipboard.setData(ClipboardData(text: msg.text));
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('답변이 복사되었습니다.'),
-                            duration: Duration(seconds: 1),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      }
+
+                      final messenger = ScaffoldMessenger.maybeOf(context);
+                      if (messenger == null) return;
+
+                      messenger.showSnackBar(
+                        const SnackBar(
+                          content: Text('답변이 복사되었습니다.'),
+                          duration: Duration(seconds: 1),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
                     },
                     child: const Icon(
                       LucideIcons.copy,
@@ -102,15 +104,15 @@ class MessageBubble extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: () {}, // TODO: 공유하기 기획 논의 필요
-                    child: const Icon(
-                      LucideIcons.share2,
-                      size: 14,
-                      color: AppColors.disable,
-                    ),
-                  ),
+                  // const SizedBox(width: 8),
+                  // GestureDetector(
+                  //   onTap: () {},
+                  //   child: const Icon(
+                  //     LucideIcons.share2,
+                  //     size: 14,
+                  //     color: AppColors.disable,
+                  //   ),
+                  // ),
                 ],
               ),
             ),

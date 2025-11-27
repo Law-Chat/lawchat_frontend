@@ -88,7 +88,7 @@ class AppModal {
                             child: AppButton(
                               variant: AppButtonVariant.outline,
                               label: cancelLabel ?? '취소',
-                              onPressed: () => Navigator.of(context).pop(),
+                              onPressed: () => Navigator.of(ctx).pop(),
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -99,7 +99,7 @@ class AppModal {
                               bgColor: confirmColor ?? AppColors.primary,
                               iconColor: Colors.white,
                               onPressed: () {
-                                Navigator.of(context).pop();
+                                Navigator.of(ctx).pop();
                                 WidgetsBinding.instance.addPostFrameCallback((
                                   _,
                                 ) {

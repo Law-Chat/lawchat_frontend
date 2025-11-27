@@ -121,7 +121,18 @@ class _MyAppState extends State<MyApp> {
             return const ChattingPage();
           },
         ),
-        GoRoute(path: '/law/detail', builder: (_, __) => const LawDetailPage()),
+        GoRoute(
+          path: '/law/detail',
+          builder: (context, state) {
+            final extra = state.extra;
+            if (extra is RelatedLaw) {
+              return LawDetailPage(relatedLaw: extra);
+            }
+            return LawDetailPage(
+              relatedLaw: RelatedLaw(name: '', content: '', keywords: []),
+            );
+          },
+        ),
       ],
     );
   }

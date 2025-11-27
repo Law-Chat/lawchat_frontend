@@ -1,41 +1,66 @@
 enum ChatRole { user, assistant }
 
+class RelatedLaw {
+  final String name;
+  final String content;
+  final List<String> keywords;
+
+  RelatedLaw({
+    required this.name,
+    required this.content,
+    required this.keywords,
+  });
+
+  factory RelatedLaw.fromJson(Map<String, dynamic> json) {
+    return RelatedLaw(
+      name: json['name'] as String? ?? '',
+      content: json['content'] as String? ?? '',
+      keywords:
+          (json['keywords'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
+    );
+  }
+}
+
 class ChatMessage {
   final ChatRole role;
   final String text;
-  final DateTime time;
+  final RelatedLaw? relatedLaw;
 
-  ChatMessage({required this.role, required this.text, required this.time});
+  ChatMessage({required this.role, required this.text, this.relatedLaw});
+
+  factory ChatMessage.fromJson(Map<String, dynamic> json) {
+    return ChatMessage(
+      role: json['type'] == 'USER' ? ChatRole.user : ChatRole.assistant,
+      text: json['message'] as String? ?? '',
+      relatedLaw: json['relatedLaw'] != null
+          ? RelatedLaw.fromJson(json['relatedLaw'] as Map<String, dynamic>)
+          : null,
+    );
+  }
 }
 
 class ChatThread {
-  final String id;
+  final int id;
   final String title;
   final List<ChatMessage> messages;
 
   ChatThread({required this.id, required this.title, required this.messages});
 
-  factory ChatThread.mock(String title) {
+  factory ChatThread.fromJson(Map<String, dynamic> json) {
+    final rawId = json['chatId'];
+    final intId = rawId is int ? rawId : int.parse(rawId.toString());
+
+    final messagesJson = json['messages'] as List<dynamic>? ?? const [];
+
     return ChatThread(
-      id: title.hashCode.toString(),
-      title: title,
-      messages: [
-        ChatMessage(
-          role: ChatRole.user,
-          text: title,
-          time: DateTime.now().subtract(const Duration(minutes: 5)),
-        ),
-        ChatMessage(
-          role: ChatRole.assistant,
-          text:
-              '현재 「금융소비자보호법 제19조」 및 「대부업법 시행령 제8조」에 따라 '
-              '최고 이자율은 연 20%를 초과할 수 없습니다. 이는 금융위원회 고시로 정해진 법정 최고금리입니다.\n\n'
-              '▪️ 법적 근거: 금융소비자보호법 제19조, 대부업법 시행령 제8조\n'
-              '▪️ 최고 이자율: 연 20% 이하\n'
-              '▪️ 초과 시: 초과 이자는 무효, 반환 청구 가능',
-          time: DateTime.now().subtract(const Duration(minutes: 4)),
-        ),
-      ],
+      id: intId,
+      title: (json['summary'] ?? '').toString(),
+      messages: messagesJson
+          .map((e) => ChatMessage.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 }

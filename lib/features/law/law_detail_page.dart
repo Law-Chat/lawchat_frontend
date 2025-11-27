@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../theme/colors.dart';
 import '../../ui/components/button.dart';
+import '../../models/chat_models.dart';
 
 class LawDetailPage extends StatelessWidget {
-  const LawDetailPage({super.key});
+  const LawDetailPage({super.key, required this.relatedLaw});
+
+  final RelatedLaw relatedLaw;
 
   @override
   Widget build(BuildContext context) {
@@ -27,35 +30,42 @@ class LawDetailPage extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '금융소비자보호법 제19조 (설명의무)',
-              style: TextStyle(
+            Text(
+              relatedLaw.name,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: AppColors.secondary,
               ),
             ),
             const SizedBox(height: 20),
+
             const Divider(color: AppColors.tertiary, height: 1),
             const SizedBox(height: 20),
-            const Text(
-              '금융상품 판매업자 등은 금융상품 계약을 체결할 때 금융소비자에게 해당 금융상품의 내용, '
-              '위험요인 및 거래조건에 관하여 충실히 설명하여야 한다.',
-              style: TextStyle(height: 1.5, color: AppColors.secondary),
-            ),
-            const SizedBox(height: 20),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 4,
-                alignment: WrapAlignment.start,
-                children: [_Tag('#대출'), _Tag('#설명의무'), _Tag('#금융상품')],
+
+            Text(
+              relatedLaw.content,
+              style: const TextStyle(
+                fontSize: 14,
+                height: 1.5,
+                color: AppColors.secondary,
               ),
             ),
+
+            const SizedBox(height: 20),
+
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: (relatedLaw.keywords ?? [])
+                  .map((k) => _Tag('#$k'))
+                  .toList(),
+            ),
+
             const Spacer(),
+
             AppButton(
               variant: AppButtonVariant.primary,
               label: '대화로 돌아가기',
@@ -70,8 +80,8 @@ class LawDetailPage extends StatelessWidget {
 }
 
 class _Tag extends StatelessWidget {
-  const _Tag(this.text);
   final String text;
+  const _Tag(this.text);
 
   @override
   Widget build(BuildContext context) {
