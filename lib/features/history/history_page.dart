@@ -9,9 +9,9 @@ import '../../ui/components/input.dart';
 import '../../ui/components/modal.dart';
 import 'history_item.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
-import '../../models/chat_models.dart';
 import '../../models/chat_history_models.dart';
 import '../../services/chat_history_service.dart';
+import '../../services/chat_service.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -48,13 +48,22 @@ class _HistoryPageState extends State<HistoryPage> {
     });
 
     try {
-      final result = await ChatHistoryService.instance.getHistories();
+      final result = await ChatHistoryService.instance.getHistories(
+        startDate: _range?.start,
+        endDate: _range?.end,
+        keyword: _query.isEmpty ? null : _query,
+      );
       if (!mounted) return;
       setState(() {
         _all = result;
         _isLoading = false;
       });
     } catch (e) {
+      if (e.toString().contains('세션이 만료')) {
+        context.go('/login');
+        return;
+      }
+
       if (!mounted) return;
       setState(() {
         _isLoading = false;
@@ -69,7 +78,6 @@ class _HistoryPageState extends State<HistoryPage> {
     super.dispose();
   }
 
-  // 날짜 그룹핑
   LinkedHashMap<String, List<HistoryEntry>> _group(List<HistoryEntry> list) {
     final now = DateTime.now();
     bool sameDay(DateTime a, DateTime b) =>
@@ -102,21 +110,9 @@ class _HistoryPageState extends State<HistoryPage> {
     return map;
   }
 
-  // TODO: 검색어 + 기간 필터 파라미터 수정
   List<HistoryEntry> get _filtered {
     return _all.where((e) {
-      final matchText = _query.isEmpty || e.summary.contains(_query);
-
-      final matchDate = _range == null
-          ? true
-          : (e.createdAt.isAfter(
-                  _range!.start.subtract(const Duration(seconds: 1)),
-                ) &&
-                e.createdAt.isBefore(
-                  _range!.end.add(const Duration(seconds: 1)),
-                ));
-
-      return matchText && matchDate;
+      return _query.isEmpty || e.summary.contains(_query);
     }).toList();
   }
 
@@ -158,6 +154,10 @@ class _HistoryPageState extends State<HistoryPage> {
                     endRangeSelectionColor: AppColors.primary,
                     todayHighlightColor: AppColors.primary,
                     selectionTextStyle: const TextStyle(color: Colors.white),
+                    initialSelectedRange: _range != null
+                        ? PickerDateRange(_range!.start, _range!.end)
+                        : null,
+                    initialDisplayDate: _range?.start,
                     headerStyle: const DateRangePickerHeaderStyle(
                       backgroundColor: AppColors.white,
                       textAlign: TextAlign.center,
@@ -203,7 +203,13 @@ class _HistoryPageState extends State<HistoryPage> {
 
     if (pickedRange != null) {
       setState(() => _range = pickedRange);
+      _fetchHistories();
     }
+  }
+
+  void _onSearch() {
+    FocusScope.of(context).unfocus();
+    _fetchHistories();
   }
 
   void _confirmDelete(HistoryEntry entry) {
@@ -271,6 +277,8 @@ class _HistoryPageState extends State<HistoryPage> {
                     variant: AppInputVariant.search,
                     controller: _searchCtrl,
                     hintText: '검색어를 입력하세요.',
+                    trailingIcon: LucideIcons.search,
+                    onTrailingPressed: _onSearch,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -318,14 +326,19 @@ class _HistoryPageState extends State<HistoryPage> {
                             const SizedBox(height: 10),
                             ...section.value.map(
                               (entry) => HistoryItem(
+                                chatId: entry.chatId,
                                 title: entry.summary,
-                                onTap: () {
-                                  final thread = ChatThread(
-                                    id: entry.chatId.toString(),
-                                    title: entry.summary,
-                                    messages: const [],
-                                  );
-                                  context.push('/chatting', extra: thread);
+                                onTap: () async {
+                                  try {
+                                    final detail = await ChatService.instance
+                                        .getChatDetail(entry.chatId);
+
+                                    context.push('/chatting', extra: detail);
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('채팅 불러오기 실패: $e')),
+                                    );
+                                  }
                                 },
                                 onDelete: () => _confirmDelete(entry),
                               ),
