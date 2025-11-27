@@ -5,11 +5,13 @@ import '../../theme/colors.dart';
 class HistoryItem extends StatelessWidget {
   const HistoryItem({
     super.key,
+    required this.chatId,
     required this.title,
     required this.onTap,
     required this.onDelete,
   });
 
+  final int chatId;
   final String title;
   final VoidCallback onTap;
   final VoidCallback onDelete;
@@ -19,7 +21,7 @@ class HistoryItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Slidable(
-        key: ValueKey(title),
+        key: ValueKey(chatId),
         endActionPane: ActionPane(
           motion: const DrawerMotion(),
           extentRatio: 0.26,
@@ -41,10 +43,8 @@ class HistoryItem extends StatelessWidget {
               foregroundColor: Colors.white,
               icon: Icons.delete_outline_rounded,
               borderRadius: const BorderRadius.only(
-                topRight: Radius.circular(0),
-                bottomRight: Radius.circular(0),
-                topLeft: Radius.circular(12),
-                bottomLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+                bottomRight: Radius.circular(12),
               ),
               flex: 5,
             ),
