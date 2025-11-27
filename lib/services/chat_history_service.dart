@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../models/chat_history_models.dart';
 import 'auth_service.dart';
+import 'api_error_handler.dart';
 
 class ChatHistoryService {
   ChatHistoryService._internal();
@@ -11,15 +12,40 @@ class ChatHistoryService {
 
   String get _baseUrl => dotenv.env['BASE_URL'] ?? '';
 
-  Future<List<HistoryEntry>> getHistories() async {
+  String _formatDate(DateTime d) {
+    final y = d.year.toString().padLeft(4, '0');
+    final m = d.month.toString().padLeft(2, '0');
+    final day = d.day.toString().padLeft(2, '0');
+    return '$y-$m-$day';
+  }
+
+  Future<List<HistoryEntry>> getHistories({
+    DateTime? startDate,
+    DateTime? endDate,
+    String? keyword,
+  }) async {
     final token = await AuthService.instance.getToken();
 
     if (token == null || token.isEmpty) {
       throw Exception('로그인 정보가 없습니다. 다시 로그인 해주세요.');
     }
 
-    // TODO: 검색어 + 기간 필터 파라미터 수정
-    final uri = Uri.parse('$_baseUrl/api/chat/histories');
+    final query = <String, String>{};
+    if (startDate != null) {
+      query['startDate'] = _formatDate(startDate);
+    }
+    if (endDate != null) {
+      query['endDate'] = _formatDate(endDate);
+    }
+    if (keyword != null && keyword.isNotEmpty) {
+      query['keyword'] = keyword;
+    }
+
+    final uri = Uri.parse(
+      '$_baseUrl/api/chat/histories',
+    ).replace(queryParameters: query.isEmpty ? null : query);
+
+    print(">>> GET: $uri");
 
     final res = await http.get(
       uri,
@@ -28,6 +54,11 @@ class ChatHistoryService {
         'Content-Type': 'application/json',
       },
     );
+
+    print(">>> STATUS: ${res.statusCode}");
+    print(">>> BODY: ${res.body}");
+
+    await handleAuthError(res.statusCode);
 
     if (res.statusCode != 200) {
       throw Exception('히스토리 조회 실패 (${res.statusCode})');
@@ -58,7 +89,9 @@ class ChatHistoryService {
       },
     );
 
-    if (res.statusCode != 200) {
+    await handleAuthError(res.statusCode);
+
+    if (res.statusCode != 200 && res.statusCode != 204) {
       throw Exception('채팅 삭제 실패 (${res.statusCode})');
     }
   }
