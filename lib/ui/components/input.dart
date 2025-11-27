@@ -145,20 +145,32 @@ class AppInput extends StatelessWidget {
         );
 
       case AppInputVariant.search:
+        final hasTrailing = trailingIcon != null || onTrailingPressed != null;
+        final iconData = trailingIcon ?? Icons.search;
+
         return SizedBox(
           height: h,
           child: TextField(
             controller: controller,
             style: textStyle,
+            onSubmitted: (_) => onTrailingPressed?.call(),
             decoration: decoration(
               fill: AppColors.background,
               borderColor: AppColors.quaternary,
               hintColor: AppColors.disable,
-              suffixIcon: Icon(
-                Icons.search,
-                color: AppColors.disable,
-                size: iconSize,
-              ),
+              suffixIcon: hasTrailing
+                  ? IconButton(
+                      onPressed: onTrailingPressed,
+                      icon: Icon(
+                        iconData,
+                        color: AppColors.disable,
+                        size: iconSize,
+                      ),
+                      padding: EdgeInsets.zero,
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                    )
+                  : null,
             ),
           ),
         );
