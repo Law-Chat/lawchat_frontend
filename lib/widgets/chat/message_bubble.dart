@@ -85,15 +85,17 @@ class MessageBubble extends StatelessWidget {
                   GestureDetector(
                     onTap: () async {
                       await Clipboard.setData(ClipboardData(text: msg.text));
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('답변이 복사되었습니다.'),
-                            duration: Duration(seconds: 1),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      }
+
+                      final messenger = ScaffoldMessenger.maybeOf(context);
+                      if (messenger == null) return;
+
+                      messenger.showSnackBar(
+                        const SnackBar(
+                          content: Text('답변이 복사되었습니다.'),
+                          duration: Duration(seconds: 1),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
                     },
                     child: const Icon(
                       LucideIcons.copy,
