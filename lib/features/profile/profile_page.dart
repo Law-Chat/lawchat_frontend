@@ -18,7 +18,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? _errorMessage;
 
   bool _pushNotifications = false;
-  bool _legalNotifications = false;
+  // bool _legalNotifications = false; // Removed
   bool _adEmails = false;
 
   String _name = '';
@@ -67,7 +67,6 @@ class _ProfilePageState extends State<ProfilePage> {
       if (mounted) {
         setState(() {
           _pushNotifications = data['isPushEnabled'] ?? false;
-          _legalNotifications = data['isLawRevisionEnabled'] ?? false;
           _adEmails = data['isMarketingEmailEnabled'] ?? false;
         });
       }
@@ -98,7 +97,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
       final data = {
         'isPushEnabled': _pushNotifications,
-        'isLawRevisionEnabled': _legalNotifications,
         'isMarketingEmailEnabled': _adEmails,
       };
 
@@ -119,7 +117,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   /// ==========================================================
-  /// 🔥  회원 탈퇴 기능
+  ///   회원 탈퇴 기능
   /// ==========================================================
   Future<void> _confirmDeleteDialog() async {
     showDialog(
@@ -227,10 +225,7 @@ class _ProfilePageState extends State<ProfilePage> {
             setState(() => _pushNotifications = value);
             _updateNotificationSettings();
           }),
-          _buildToggleRow('법령 업데이트 알림', _legalNotifications, (value) {
-            setState(() => _legalNotifications = value);
-            _updateNotificationSettings();
-          }),
+          // Removed law revision toggle
           _buildToggleRow('광고성 이메일', _adEmails, (value) {
             setState(() => _adEmails = value);
             _updateNotificationSettings();
