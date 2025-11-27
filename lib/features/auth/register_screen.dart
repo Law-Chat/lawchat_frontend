@@ -88,7 +88,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  void _onSubmit() {
+  Future<void> _onSubmit() async {
+    await AuthService.instance.saveUser(
+      _nameController.text,
+      _emailController.text,
+    );
     context.go('/home');
   }
 
