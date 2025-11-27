@@ -124,8 +124,13 @@ class _MyAppState extends State<MyApp> {
         GoRoute(
           path: '/law/detail',
           builder: (context, state) {
-            final relatedLaw = state.extra as String? ?? '';
-            return LawDetailPage(relatedLaw: relatedLaw);
+            final extra = state.extra;
+            if (extra is RelatedLaw) {
+              return LawDetailPage(relatedLaw: extra);
+            }
+            return LawDetailPage(
+              relatedLaw: RelatedLaw(name: '', content: '', keywords: []),
+            );
           },
         ),
       ],
