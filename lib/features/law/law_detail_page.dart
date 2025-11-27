@@ -2,29 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../theme/colors.dart';
 import '../../ui/components/button.dart';
+import '../../models/chat_models.dart';
 
 class LawDetailPage extends StatelessWidget {
   const LawDetailPage({super.key, required this.relatedLaw});
 
-  final String relatedLaw;
+  final RelatedLaw relatedLaw;
 
   @override
   Widget build(BuildContext context) {
-    final String raw = relatedLaw;
-    String titleText;
-    String bodyText;
-
-    final int slashIndex = raw.indexOf('/');
-
-    if (slashIndex == -1) {
-      titleText = raw.isNotEmpty ? raw.trim() : '법령 상세';
-      bodyText = '';
-    } else {
-      titleText = raw.substring(0, slashIndex).trim();
-      bodyText = raw.substring(slashIndex + 1).trim();
-      if (titleText.isEmpty) titleText = '법령 상세';
-    }
-
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: AppBar(
@@ -44,11 +30,10 @@ class LawDetailPage extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              titleText,
-              textAlign: TextAlign.center,
+              relatedLaw.name,
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -61,12 +46,22 @@ class LawDetailPage extends StatelessWidget {
             const SizedBox(height: 20),
 
             Text(
-              bodyText.isEmpty ? '관련 법령 본문 정보가 없습니다.' : bodyText,
+              relatedLaw.content,
               style: const TextStyle(
+                fontSize: 14,
                 height: 1.5,
                 color: AppColors.secondary,
-                fontSize: 14,
               ),
+            ),
+
+            const SizedBox(height: 20),
+
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: (relatedLaw.keywords ?? [])
+                  .map((k) => _Tag('#$k'))
+                  .toList(),
             ),
 
             const Spacer(),
@@ -78,6 +73,30 @@ class LawDetailPage extends StatelessWidget {
               height: 48,
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Tag extends StatelessWidget {
+  final String text;
+  const _Tag(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: AppColors.white,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
