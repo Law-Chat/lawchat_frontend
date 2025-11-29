@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
@@ -18,7 +19,6 @@ class _ProfilePageState extends State<ProfilePage> {
   String? _errorMessage;
 
   bool _pushNotifications = false;
-  // bool _legalNotifications = false; // Removed
   bool _adEmails = false;
 
   String _name = '';
@@ -85,6 +85,17 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _updateNotificationSettings() async {
     try {
+      // Subscribe/Unsubscribe from FCM topic
+      if (_pushNotifications) {
+        await FirebaseMessaging.instance.subscribeToTopic(
+          'daily-regulation-news ',
+        );
+      } else {
+        await FirebaseMessaging.instance.unsubscribeFromTopic(
+          'daily-regulation-news ',
+        );
+      }
+
       final token = await AuthService.instance.getToken();
       if (token == null) throw Exception('Token not found');
 
@@ -116,9 +127,6 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  /// ==========================================================
-  ///   회원 탈퇴 기능
-  /// ==========================================================
   Future<void> _confirmDeleteDialog() async {
     showDialog(
       context: context,
@@ -163,7 +171,6 @@ class _ProfilePageState extends State<ProfilePage> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('계정이 삭제되었습니다.')));
-
         context.go('/login');
       }
     } catch (e) {
@@ -176,9 +183,6 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  // ================================================================
-  // UI
-  // ================================================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -218,20 +222,17 @@ class _ProfilePageState extends State<ProfilePage> {
           style: const TextStyle(fontSize: 14, color: Colors.grey),
         ),
         const SizedBox(height: 40),
-
         _buildSectionHeader('알림 설정'),
         _buildSettingsCard([
           _buildToggleRow('푸시 알림', _pushNotifications, (value) {
             setState(() => _pushNotifications = value);
             _updateNotificationSettings();
           }),
-          // Removed law revision toggle
           _buildToggleRow('광고성 이메일', _adEmails, (value) {
             setState(() => _adEmails = value);
             _updateNotificationSettings();
           }),
         ]),
-
         const SizedBox(height: 30),
         _buildSectionHeader('계정 설정'),
         _buildSettingsCard([
