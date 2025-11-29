@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "767185586966",
+    "project_id": "lawchat-14dda",
+    "storage_bucket": "lawchat-14dda.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:767185586966:android:25169a8b730f908588de37",
+        "android_client_info": {
+          "package_name": "com.example.lawchat_frontend"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDeeo5S1Ntqe105gdvObPFwcRlPLsagb14"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
