@@ -88,11 +88,11 @@ class _ProfilePageState extends State<ProfilePage> {
       // Subscribe/Unsubscribe from FCM topic
       if (_pushNotifications) {
         await FirebaseMessaging.instance.subscribeToTopic(
-          'daily-regulation-news ',
+          'daily-regulation-news', // Removed trailing space
         );
       } else {
         await FirebaseMessaging.instance.unsubscribeFromTopic(
-          'daily-regulation-news ',
+          'daily-regulation-news', // Removed trailing space
         );
       }
 
