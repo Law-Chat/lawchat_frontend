@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -26,7 +27,7 @@ import 'services/auth_service.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
-  await Firebase.initializeApp(); // Added for Firebase initialization
+  await Firebase.initializeApp();
 
   final isLoggedIn = await AuthService.instance.isLoggedIn();
 
@@ -73,6 +74,24 @@ class _MyAppState extends State<MyApp> {
         if (isNewUser) {
           _router.go('/register');
         } else {
+          try {
+            final dio = Dio(
+              BaseOptions(
+                baseUrl: dotenv.env['BASE_URL'] ?? '',
+                headers: {'Authorization': 'Bearer $token'},
+              ),
+            );
+            final response = await dio.get('/api/auth/me');
+            final data = response.data as Map<String, dynamic>;
+            final name = data['name'] as String?;
+            final email = data['email'] as String?;
+
+            if (name != null && email != null) {
+              await AuthService.instance.saveUser(name, email);
+            }
+          } catch (e) {
+            debugPrint('Failed to fetch user info on login: $e');
+          }
           _router.go('/home');
         }
       }
