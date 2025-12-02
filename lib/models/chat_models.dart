@@ -25,14 +25,24 @@ class RelatedLaw {
 }
 
 class ChatMessage {
+  final int messageId;
   final ChatRole role;
   final String text;
   final RelatedLaw? relatedLaw;
 
-  ChatMessage({required this.role, required this.text, this.relatedLaw});
+  ChatMessage({
+    required this.messageId,
+    required this.role,
+    required this.text,
+    this.relatedLaw,
+  });
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
+    final rawId = json['messageId'];
+    final intId = rawId is int ? rawId : int.parse(rawId.toString());
+
     return ChatMessage(
+      messageId: intId,
       role: json['type'] == 'USER' ? ChatRole.user : ChatRole.assistant,
       text: json['message'] as String? ?? '',
       relatedLaw: json['relatedLaw'] != null
