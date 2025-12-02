@@ -100,4 +100,41 @@ class ChatService {
 
     return ChatThread.fromJson(decoded);
   }
+
+  Future<ChatThread> regenerateMessage({
+    required int chatId,
+    required int messageId,
+  }) async {
+    final token = await _getToken();
+    final uri = Uri.parse(
+      '$_baseUrl/api/chat/$chatId/messages/$messageId/regenerate',
+    );
+
+    print('>>> POST 재생성 → $uri');
+
+    final res = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    print('>>> STATUS: ${res.statusCode}');
+    print('>>> BODY: ${res.body}');
+
+    await handleAuthError(res.statusCode);
+
+    if (res.statusCode != 200) {
+      throw Exception('응답 재생성 실패 (${res.statusCode})');
+    }
+
+    final decoded = jsonDecode(res.body);
+    if (decoded is! Map<String, dynamic>) {
+      print('>>> 예기치 않은 응답 형식(REGENERATE): ${res.body}');
+      throw Exception('예상치 못한 응답 형식입니다.');
+    }
+
+    return ChatThread.fromJson(decoded);
+  }
 }
