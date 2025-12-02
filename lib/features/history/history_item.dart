@@ -45,6 +45,8 @@ class HistoryItem extends StatelessWidget {
               borderRadius: const BorderRadius.only(
                 topRight: Radius.circular(12),
                 bottomRight: Radius.circular(12),
+                topLeft: Radius.circular(12),
+                bottomLeft: Radius.circular(12),
               ),
               flex: 5,
             ),
