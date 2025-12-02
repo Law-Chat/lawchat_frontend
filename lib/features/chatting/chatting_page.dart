@@ -104,6 +104,52 @@ class _ChattingPageState extends State<ChattingPage> {
     }
   }
 
+  Future<void> _regenerateLastResponse() async {
+    if (_chatId == null || _isSending || _messages.isEmpty) return;
+
+    ChatMessage? target;
+    for (int i = _messages.length - 1; i >= 0; i--) {
+      if (_messages[i].role == ChatRole.assistant) {
+        target = _messages[i];
+        break;
+      }
+    }
+
+    if (target == null) return;
+
+    setState(() => _isSending = true);
+
+    try {
+      final thread = await ChatService.instance.regenerateMessage(
+        chatId: _chatId!,
+        messageId: target.messageId,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _messages = [..._messages, ...thread.messages];
+        _isSending = false;
+      });
+    } catch (e) {
+      if (e.toString().contains('세션이 만료')) {
+        if (mounted) context.go('/login');
+        return;
+      }
+
+      if (!mounted) return;
+
+      setState(() => _isSending = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('응답 재생성 중 오류가 발생했습니다.\n${e.toString()}'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
   void _openLawDetail(ChatMessage msg) {
     final law = msg.relatedLaw;
     if (law == null) {
@@ -197,14 +243,40 @@ class _ChattingPageState extends State<ChattingPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  if (_isSending)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: const AlwaysStoppedAnimation(
+                                AppColors.quaternary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            '답변 생성 중...',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.quaternary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
                   if (!_isOnboarding)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 30),
                       child: Center(
                         child: GestureDetector(
-                          onTap: () {
-                            // TODO: Regenerate API 연결 예정
-                          },
+                          onTap: _isSending ? null : _regenerateLastResponse,
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -247,7 +319,9 @@ class _ChattingPageState extends State<ChattingPage> {
                     controller: _input,
                     hintText: '무엇이든 물어보세요',
                     trailingIcon: LucideIcons.send,
-                    onTrailingPressed: () => _send(_input.text),
+                    onTrailingPressed: _isSending
+                        ? null
+                        : () => _send(_input.text),
                     compact: true,
                   ),
                 ],
