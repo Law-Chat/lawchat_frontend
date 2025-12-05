@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:767185586966:android:25169a8b730f908588de37",
+        "mobilesdk_app_id": "1:767185586966:android:fb1f99759ab05c7388de37",
         "android_client_info": {
-          "package_name": "com.example.lawchat_frontend"
+          "package_name": "com.lawchat.app"
         }
       },
       "oauth_client": [],
