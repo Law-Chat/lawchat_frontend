@@ -1,4 +1,4 @@
-package com.example.lawchat_frontend;
+package com.lawchat.app;
 
 import io.flutter.embedding.android.FlutterActivity;
 
