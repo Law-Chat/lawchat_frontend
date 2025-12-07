@@ -22,7 +22,14 @@ Law Chat은 금융소비자보호법, 자본시장법, 대부업법 등 금융 �
     - 이전 대화 내용과 상황을 기억해 후속 정보까지 자연스럽게 연결
     - 알림과 연동되어 ‘지속적인 법률 케어’ 경험 제공
 
-### 1-3. 서비스 관련 링크
+### 1-3. 서비스 배포
+LawChat 앱은 원스토어(ONE Store)에 배포 완료되었으며, 현재 서비스 출시를 위한 검증 심사 대기 상태입니다. <br/>
+검증이 완료되는 즉시 정식 다운로드 링크가 README에 업데이트될 예정입니다.
+<img width="1822" height="1184" alt="원스토어 검증 대기 캡쳐본" src="https://github.com/user-attachments/assets/aa27f786-f675-4123-aff6-0664ffc54c9f" />
+
+
+### 1-4. 서비스 관련 링크
+- 다운로드 링크 (검증 심사 대기 중)
 - [Figma](https://www.figma.com/design/xPGMt4hfBtPhvQL3Hm2hhd/LawChat-UI?node-id=0-1&t=SW2XUJHcn8WMA5Tk-1)
 
 <br/>
@@ -75,7 +82,106 @@ Law Chat은 금융소비자보호법, 자본시장법, 대부업법 등 금융 �
 <br/>
 
 ## 4. 프로젝트 실행 방법
+### 4-1. Frontend 실행 방법
+1. 프로젝트 Repository를 원하는 경로에 clone합니다.
+```sh
+git clone https://github.com/Law-Chat/lawchat_frontend.git
+```
 
+<br/>
+
+2. clone한 Repository의 root 경로로 이동합니다.
+```sh
+cd lawchat_frontend
+```
+
+<br/>
+
+3. Flutter SDK가 설치되어 있는지 확인하고 환경을 점검합니다.  
+    3-1. 운영체제에 맞는 Flutter SDK를 다운로드합니다. ([다운로드 링크](https://docs.flutter.dev/get-started/install))  
+    3-2. 원하는 경로에 SDK를 압축 해제합니다.  
+    3-3. `bin` 디렉터리 경로를 시스템 PATH 환경 변수에 추가합니다.  
+    3-4. 아래 명령어로 설치 상태를 확인합니다.
+
+    ```sh
+    flutter doctor
+    ```
+    
+    실행 결과에서 [✓] 체크 표시가 모두 나타나면 다음 단계로 진행할 수 있습니다. 만약 [✗] 또는 [!] 표시가 있다면, doctor가 알려주는 안내에 따라 관련 도구(Android Studio, Xcode, Chrome 등)를 설치하거나 설정해주세요.
+    <img width="1384" height="714" alt="image" src="https://github.com/user-attachments/assets/62825c16-acd6-421b-a07d-9e0ffb647662" />
+
+
+> 이 프로젝트는 아래 버전에서 개발되었습니다.  
+> **Flutter 3.35.7, Dart 3.9.2**
+
+
+<br/>
+
+4. 프로젝트 의존성 패키지를 설치합니다.
+```sh
+flutter pub get
+```
+
+<br/>
+
+5. 프로젝트 루트에 `.env` 파일을 생성하고 내용을 추가합니다.(보안 이슈로 `.env` 파일 내용은 아래의 노션 상단 .env 설정 가이드를 참고해주세요.) <br/>
+🔗 [Law-Chat 로컬 환경 테스트 .env 파일 설정 방법](https://www.notion.so/2025-2-_-2-_03-299aa5307d2a80a1a2f2f11eb568a0b3?source=copy_link)
+<br/>
+
+6. 가상 기기(에뮬레이터)를 실행합니다. <br/>
+> 이 프로젝트는 아래와 같은 Android 가상 기기에서 테스트되었습니다. <br/>
+> **Pixel 7 (Android 14.0 "UpsideDownCake", API 34, arm64)**
+
+<br/>
+
+7. 아래 명령어를 실행하여 Flutter App을 실행합니다.
+```sh
+flutter run
+```
+
+<br/>
+
+### 4-2. Backend 실행 방법
+
+1. 백엔드 프로젝트 Repository를 원하는 경로에 clone합니다.
+```sh
+git clone https://github.com/Law-Chat/lawchat_backend.git
+```
+
+2.	clone한 Repository의 root 경로로 이동합니다.
+```sh
+cd lawchat_backend
+```
+
+3.	JDK 및 빌드 도구(Gradle/Maven)가 준비되어 있는지 확인합니다.
+- 3-1. JDK 설치 (예: JDK 21 권장)
+  - 운영체제에 맞는 JDK를 설치한 후 아래 명령어로 정상 설치 여부를 확인합니다.
+- 3-2. 빌드 도구 확인
+  - LawChat은 Gradle 프로젝트
+  ```sh
+  ./gradlew -v   # Windows: gradlew.bat -v
+  ```
+
+4.	백엔드 환경 설정 파일을 준비합니다.
+	•	src/main/resources/application-dev.yml
+
+환경 변수(API 서버 포트, DB 설정, JWT 키 등)는 아래 설정 가이드를 참고하여 입력해주세요.<br/>
+🔗 [Law-Chat 백엔드 application-dev.yml 설정 방법](https://www.notion.so/2025-2-_-2-_03-299aa5307d2a80a1a2f2f11eb568a0b3?source=copy_link)
+
+5.	로컬 DB 또는 외부 서비스가 필요하다면 실행합니다.
+
+예: MySQL 등
+
+	•	DB 스키마 생성
+
+6.	Spring Boot 애플리케이션을 실행합니다. (로컬에서 실행하려면 'dev'로 환경 설정)
+
+```sh
+./gradlew bootRun --args='--spring.profiles.active=dev'
+```
+7. Frontend와 연동 테스트를 진행합니다.
+<br/>
+앱에서 로그인/조회 등 주요 API 호출이 정상적으로 동작하는지 테스트
 
 <br/>
 
