@@ -75,7 +75,56 @@ Law Chat은 금융소비자보호법, 자본시장법, 대부업법 등 금융 �
 <br/>
 
 ## 4. 프로젝트 실행 방법
+### 4-1. Frontend 실행 방법
+1. 프로젝트 Repository를 원하는 경로에 clone합니다.
+```sh
+git clone https://github.com/Law-Chat/lawchat_frontend.git
+```
 
+<br/>
+
+2. clone한 Repository의 root 경로로 이동합니다.
+```sh
+cd lawchat_frontend
+```
+
+<br/>
+
+3. Flutter SDK가 설치되어 있는지 확인하고 환경을 점검합니다.  
+    3-1. 운영체제에 맞는 Flutter SDK를 다운로드합니다. ([다운로드 링크](https://docs.flutter.dev/get-started/install))  
+    3-2. 원하는 경로에 SDK를 압축 해제합니다.  
+    3-3. `bin` 디렉터리 경로를 시스템 PATH 환경 변수에 추가합니다.  
+    3-4. 아래 명령어로 설치 상태를 확인합니다.
+
+    ```sh
+    flutter doctor
+    ```
+
+> 이 프로젝트는 아래 버전에서 개발되었습니다.  
+> **Flutter 3.35.7, Dart 3.9.2**
+
+
+<br/>
+
+4. 프로젝트 의존성 패키지를 설치합니다.
+```sh
+flutter pub get
+```
+
+<br/>
+
+5. 프로젝트 루트에 `.env` 파일을 생성하고 내용을 추가합니다.(보안 이슈로 `.env` 파일 내용은 아래의 노션 상단 .env 설정 가이드를 참고해주세요.) <br/>
+🔗 [Law-Chat 로컬 환경 테스트 .env 파일 설정 방법](https://www.notion.so/2025-2-_-2-_03-299aa5307d2a80a1a2f2f11eb568a0b3?source=copy_link)
+<br/>
+
+6. 가상 기기(에뮬레이터)를 실행합니다. <br/>
+> 이 프로젝트는 아래와 같은 Android 가상 기기에서 테스트되었습니다.
+> **Pixel 7 (Android 14.0 "UpsideDownCake", API 34, arm64)**
+
+7. 아래 명령어를 실행하여 Flutter App을 실행합니다.
+```sh
+flutter run
+```
 
 <br/>
 
