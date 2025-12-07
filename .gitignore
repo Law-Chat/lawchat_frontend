@@ -46,6 +46,3 @@ app.*.map.json
 
 # Environment Variables (API keys, secrets, tokens)
 .env
-
-# keystore info
-android/gradle.properties

@@ -1,8 +1,16 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
     id("com.google.gms.google-services")
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+val envFile = rootProject.file("../.env")
+val env = Properties().apply {
+    load(FileInputStream(envFile))
 }
 
 android {
@@ -30,9 +38,9 @@ android {
     signingConfigs {
         create("release") {
             storeFile = file("upload-keystore.jks")
-            storePassword = project.findProperty("MY_STORE_PASSWORD") as String?
+            storePassword = env["MY_STORE_PASSWORD"] as String
             keyAlias = "upload"
-            keyPassword = project.findProperty("MY_KEY_PASSWORD") as String?
+            keyPassword = env["MY_KEY_PASSWORD"] as String
         }
     }
 
