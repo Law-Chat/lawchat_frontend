@@ -122,7 +122,7 @@ flutter pub get
 <br/>
 
 6. 가상 기기(에뮬레이터)를 실행합니다. <br/>
-> 이 프로젝트는 아래와 같은 Android 가상 기기에서 테스트되었습니다.
+> 이 프로젝트는 아래와 같은 Android 가상 기기에서 테스트되었습니다. <br/>
 > **Pixel 7 (Android 14.0 "UpsideDownCake", API 34, arm64)**
 
 <br/>
