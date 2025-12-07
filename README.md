@@ -22,7 +22,14 @@ Law Chat은 금융소비자보호법, 자본시장법, 대부업법 등 금융 �
     - 이전 대화 내용과 상황을 기억해 후속 정보까지 자연스럽게 연결
     - 알림과 연동되어 ‘지속적인 법률 케어’ 경험 제공
 
+### 1-4. 서비스 배포
+LawChat 앱은 원스토어(ONE Store)에 배포 완료되었으며, 현재 서비스 출시를 위한 검증 심사 대기 상태입니다. <br/>
+검증이 완료되는 즉시 정식 다운로드 링크가 README에 업데이트될 예정입니다.
+<img width="2784" height="3042" alt="image" src="https://github.com/user-attachments/assets/e768ba91-7d4b-4652-b6cc-02e4fd5bdba2" />
+
+
 ### 1-3. 서비스 관련 링크
+- 다운로드 링크 (검증 심사 대기 중)
 - [Figma](https://www.figma.com/design/xPGMt4hfBtPhvQL3Hm2hhd/LawChat-UI?node-id=0-1&t=SW2XUJHcn8WMA5Tk-1)
 
 <br/>
