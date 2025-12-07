@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../theme/colors.dart';
+import '../../services/chat_history_refresh_bus.dart';
 
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.child});
@@ -17,7 +18,17 @@ class AppShell extends StatelessWidget {
       extendBody: true,
       body: child,
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/chatting'),
+        onPressed: () async {
+          await context.push('/chatting');
+
+          if (!context.mounted) return;
+
+          final locAfter = GoRouterState.of(context).uri.toString();
+
+          if (locAfter == '/history') {
+            ChatHistoryRefreshBus.instance.refresh();
+          }
+        },
         backgroundColor: cs.primary,
         child: const Icon(LucideIcons.plus, size: 28, color: Colors.white),
       ),

@@ -13,6 +13,8 @@ import '../../models/chat_history_models.dart';
 import '../../services/chat_history_service.dart';
 import '../../services/chat_service.dart';
 
+import '../../services/chat_history_refresh_bus.dart';
+
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
   @override
@@ -30,6 +32,8 @@ class _HistoryPageState extends State<HistoryPage> {
   bool _isLoading = false;
   String? _error;
 
+  late final VoidCallback _refreshListener;
+
   @override
   void initState() {
     super.initState();
@@ -37,6 +41,11 @@ class _HistoryPageState extends State<HistoryPage> {
     _searchCtrl.addListener(
       () => setState(() => _query = _searchCtrl.text.trim()),
     );
+
+    _refreshListener = () {
+      _fetchHistories();
+    };
+    ChatHistoryRefreshBus.instance.notifier.addListener(_refreshListener);
 
     _fetchHistories();
   }
@@ -74,6 +83,7 @@ class _HistoryPageState extends State<HistoryPage> {
 
   @override
   void dispose() {
+    ChatHistoryRefreshBus.instance.notifier.removeListener(_refreshListener);
     _searchCtrl.dispose();
     super.dispose();
   }
