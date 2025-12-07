@@ -25,7 +25,7 @@ Law Chat은 금융소비자보호법, 자본시장법, 대부업법 등 금융 �
 ### 1-3. 서비스 배포
 LawChat 앱은 원스토어(ONE Store)에 배포 완료되었으며, 현재 서비스 출시를 위한 검증 심사 대기 상태입니다. <br/>
 검증이 완료되는 즉시 정식 다운로드 링크가 README에 업데이트될 예정입니다.
-<img width="2784" height="3042" alt="image" src="https://github.com/user-attachments/assets/e768ba91-7d4b-4652-b6cc-02e4fd5bdba2" />
+<img width="1822" height="1184" alt="원스토어 검증 대기 캡쳐본" src="https://github.com/user-attachments/assets/aa27f786-f675-4123-aff6-0664ffc54c9f" />
 
 
 ### 1-4. 서비스 관련 링크
