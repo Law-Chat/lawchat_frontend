@@ -22,6 +22,9 @@ Law Chat은 금융소비자보호법, 자본시장법, 대부업법 등 금융 �
     - 이전 대화 내용과 상황을 기억해 후속 정보까지 자연스럽게 연결
     - 알림과 연동되어 ‘지속적인 법률 케어’ 경험 제공
 
+### 1-3. 서비스 관련 링크
+- [Figma](https://www.figma.com/design/xPGMt4hfBtPhvQL3Hm2hhd/LawChat-UI?node-id=0-1&t=SW2XUJHcn8WMA5Tk-1)
+
 <br/>
 
 ## 2. 팀원 소개
@@ -90,6 +93,7 @@ LawChat 접속 시 짧은 스플래시 스크린을 지나 로그인 화면으�
 ### 5-2. 온보딩 
 온보딩 화면은 앱을 처음 접속하는 유저에게 서비스의 핵심 기능과 사용 목적을 안내하는 역할을 합니다.
 <p align="center">
+    <img width="334" height="668" alt="MP-03-최종발표" src="https://github.com/user-attachments/assets/92b62553-c89f-478b-80fd-68bd083db6d5" />
   <img width="334" height="668" alt="MP-03-최종발표" src="https://github.com/user-attachments/assets/6ea1227b-4513-493c-b352-08758f7cce77" />
 </p>
 
