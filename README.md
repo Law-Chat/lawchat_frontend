@@ -99,6 +99,10 @@ cd lawchat_frontend
     ```sh
     flutter doctor
     ```
+    
+    실행 결과에서 [✓] 체크 표시가 모두 나타나면 다음 단계로 진행할 수 있습니다. 만약 [✗] 또는 [!] 표시가 있다면, doctor가 알려주는 안내에 따라 관련 도구(Android Studio, Xcode, Chrome 등)를 설치하거나 설정해주세요.
+    <img width="1384" height="714" alt="image" src="https://github.com/user-attachments/assets/62825c16-acd6-421b-a07d-9e0ffb647662" />
+
 
 > 이 프로젝트는 아래 버전에서 개발되었습니다.  
 > **Flutter 3.35.7, Dart 3.9.2**
@@ -120,6 +124,8 @@ flutter pub get
 6. 가상 기기(에뮬레이터)를 실행합니다. <br/>
 > 이 프로젝트는 아래와 같은 Android 가상 기기에서 테스트되었습니다.
 > **Pixel 7 (Android 14.0 "UpsideDownCake", API 34, arm64)**
+
+<br/>
 
 7. 아래 명령어를 실행하여 Flutter App을 실행합니다.
 ```sh
