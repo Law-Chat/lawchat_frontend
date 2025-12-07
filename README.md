@@ -141,6 +141,50 @@ flutter run
 
 <br/>
 
+### 4-2. Backend 실행 방법
+
+1. 백엔드 프로젝트 Repository를 원하는 경로에 clone합니다.
+```sh
+git clone https://github.com/Law-Chat/lawchat_backend.git
+```
+
+2.	clone한 Repository의 root 경로로 이동합니다.
+```sh
+cd lawchat_backend
+```
+
+3.	JDK 및 빌드 도구(Gradle/Maven)가 준비되어 있는지 확인합니다.
+- 3-1. JDK 설치 (예: JDK 21 권장)
+  - 운영체제에 맞는 JDK를 설치한 후 아래 명령어로 정상 설치 여부를 확인합니다.
+- 3-2. 빌드 도구 확인
+  - LawChat은 Gradle 프로젝트
+  ```sh
+  ./gradlew -v   # Windows: gradlew.bat -v
+  ```
+
+4.	백엔드 환경 설정 파일을 준비합니다.
+	•	src/main/resources/application-dev.yml
+
+환경 변수(API 서버 포트, DB 설정, JWT 키 등)는 아래 설정 가이드를 참고하여 입력해주세요.<br/>
+🔗 [Law-Chat 백엔드 application-dev.yml 설정 방법](https://www.notion.so/2025-2-_-2-_03-299aa5307d2a80a1a2f2f11eb568a0b3?source=copy_link)
+
+5.	로컬 DB 또는 외부 서비스가 필요하다면 실행합니다.
+
+예: MySQL 등
+
+	•	DB 스키마 생성
+
+6.	Spring Boot 애플리케이션을 실행합니다. (로컬에서 실행하려면 'dev'로 환경 설정)
+
+```sh
+./gradlew bootRun --args='--spring.profiles.active=dev'
+```
+7. Frontend와 연동 테스트를 진행합니다.
+<br/>
+앱에서 로그인/조회 등 주요 API 호출이 정상적으로 동작하는지 테스트
+
+<br/>
+
 ## 5. 주요 기능
 ### 5-1. 로그인/회원가입
 LawChat 접속 시 짧은 스플래시 스크린을 지나 로그인 화면으로 이동하게 됩니다. <br/>
